@@ -77,12 +77,14 @@ export default function Navbar() {
             transition={{ delay: 0.8 }}
             className="flex items-center space-x-4"
           >
-            <Button
-              variant="ghost"
-              className="text-white hover:text-[#20808D] hover:bg-[#20808D]/10 backdrop-blur-sm transition-all duration-300 border border-transparent hover:border-[#20808D]/30"
-            >
-              Sign In
-            </Button>
+            <Link href="/login">
+              <Button
+                variant="ghost"
+                className="text-white hover:text-[#20808D] hover:bg-[#20808D]/10 backdrop-blur-sm transition-all duration-300 border border-transparent hover:border-[#20808D]/30"
+              >
+                Sign In
+              </Button>
+            </Link>
             <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
               <Button className="bg-gradient-to-r from-[#20808D] to-[#2E565E] hover:from-[#20808D]/90 hover:to-[#2E565E]/90 text-white px-6 py-2 shadow-xl shadow-[#20808D]/30 border border-white/10 backdrop-blur-sm">
                 Get Started
