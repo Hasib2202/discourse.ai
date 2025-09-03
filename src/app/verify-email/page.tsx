@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, Suspense } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { MessageSquare, CheckCircle, Mail, ArrowRight } from "lucide-react";
@@ -9,7 +9,7 @@ import Link from "next/link";
 import { supabase } from "@/lib/supabase";
 import { useSearchParams } from "next/navigation";
 
-export default function VerifyEmailPage() {
+function VerifyEmailContent() {
   const [verificationStatus, setVerificationStatus] = useState<
     "loading" | "success" | "error"
   >("loading");
@@ -152,7 +152,7 @@ export default function VerifyEmailPage() {
             }}
           >
             <CardHeader className="text-center">
-              <CardTitle className="text-white flex items-center justify-center space-x-2">
+              <CardTitle className="flex items-center justify-center space-x-2 text-white">
                 {verificationStatus === "loading" && (
                   <>
                     <Mail className="w-5 h-5 text-[#20808D]" />
@@ -184,19 +184,19 @@ export default function VerifyEmailPage() {
               {verificationStatus === "success" && (
                 <div className="space-y-4">
                   <div className="text-center">
-                    <div className="w-16 h-16 bg-green-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <div className="flex items-center justify-center w-16 h-16 mx-auto mb-4 rounded-full bg-green-500/20">
                       <CheckCircle className="w-8 h-8 text-green-400" />
                     </div>
-                    <h2 className="text-xl font-semibold text-white mb-2">
+                    <h2 className="mb-2 text-xl font-semibold text-white">
                       🎉 Verification Successful!
                     </h2>
-                    <p className="text-white/80 mb-2">
+                    <p className="mb-2 text-white/80">
                       Your email address has been successfully verified.
                     </p>
                     {userEmail && (
                       <p className="text-sm text-[#20808D] mb-4">{userEmail}</p>
                     )}
-                    <p className="text-white/70 text-sm mb-6">
+                    <p className="mb-6 text-sm text-white/70">
                       You can now sign in to your account and start using
                       Discourse.
                     </p>
@@ -219,17 +219,17 @@ export default function VerifyEmailPage() {
               {verificationStatus === "error" && (
                 <div className="space-y-4">
                   <div className="text-center">
-                    <div className="w-16 h-16 bg-red-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <div className="flex items-center justify-center w-16 h-16 mx-auto mb-4 rounded-full bg-red-500/20">
                       <Mail className="w-8 h-8 text-red-400" />
                     </div>
-                    <h2 className="text-xl font-semibold text-white mb-2">
+                    <h2 className="mb-2 text-xl font-semibold text-white">
                       Verification Failed
                     </h2>
-                    <p className="text-white/80 mb-4">
+                    <p className="mb-4 text-white/80">
                       We couldn&apos;t verify your email address. This could be
                       due to:
                     </p>
-                    <ul className="text-sm text-white/70 text-left space-y-1 mb-6">
+                    <ul className="mb-6 space-y-1 text-sm text-left text-white/70">
                       <li>• The verification link has expired</li>
                       <li>• The link has already been used</li>
                       <li>• Invalid or corrupted link</li>
@@ -267,7 +267,7 @@ export default function VerifyEmailPage() {
           transition={{ duration: 0.8, delay: 0.4 }}
           className="mt-6 text-center"
         >
-          <p className="text-white/60 text-sm">
+          <p className="text-sm text-white/60">
             Need help?{" "}
             <Link
               href="/"
@@ -279,5 +279,19 @@ export default function VerifyEmailPage() {
         </motion.div>
       </div>
     </div>
+  );
+}
+
+export default function VerifyEmailPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="min-h-screen bg-[#091717] flex items-center justify-center">
+          <div className="text-white">Loading...</div>
+        </div>
+      }
+    >
+      <VerifyEmailContent />
+    </Suspense>
   );
 }
