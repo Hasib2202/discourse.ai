@@ -47,7 +47,6 @@ export default function LandingPage() {
     "⭐ 4.9/5 User Rating",
   ];
 
-
   const bgGridStyle = {
     backgroundImage: `linear-gradient(rgba(32, 128, 141, 0.3) 1px, transparent 1px), linear-gradient(90deg, rgba(32, 128, 141, 0.3) 1px, transparent 1px)`,
     backgroundSize: "60px 60px",

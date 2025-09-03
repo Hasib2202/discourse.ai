@@ -9,19 +9,19 @@ export async function signUp(email: string, password: string, fullName: string) 
       data: {
         full_name: fullName,
       },
-      emailRedirectTo: `${window.location.origin}/dashboard`
+      emailRedirectTo: typeof window !== 'undefined' 
+        ? `${window.location.origin}/dashboard`
+        : 'https://discourse-frontend-git-dev-hasib2202s-projects.vercel.app/dashboard'
     }
   })
   
   return { data, error }
-}
-
-export async function signIn(email: string, password: string) {
+}export async function signIn(email: string, password: string) {
   const { data, error } = await supabase.auth.signInWithPassword({
     email,
     password
   })
-  
+
   return { data, error }
 }
 
@@ -42,6 +42,6 @@ export async function signInWithGoogle() {
       redirectTo: `${window.location.origin}/dashboard`
     }
   })
-  
+
   return { data, error }
 }
