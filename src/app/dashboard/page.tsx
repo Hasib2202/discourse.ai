@@ -106,7 +106,9 @@ export default function DashboardPage() {
               </p>
               <p>
                 <strong>Joined:</strong>{" "}
-                {user?.created_at ? new Date(user.created_at).toLocaleDateString() : "N/A"}
+                {user?.created_at
+                  ? new Date(user.created_at).toLocaleDateString()
+                  : "N/A"}
               </p>
             </div>
           </CardContent>

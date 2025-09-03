@@ -10,8 +10,8 @@ export async function signUp(email: string, password: string, fullName: string) 
         full_name: fullName,
       },
       emailRedirectTo: typeof window !== 'undefined'
-        ? `${window.location.origin}/dashboard`
-        : 'https://discourse-frontend-git-dev-hasib2202s-projects.vercel.app/dashboard'
+        ? `${window.location.origin}/verify-email`
+        : 'https://discourse-frontend-git-dev-hasib2202s-projects.vercel.app/verify-email'
     }
   })
 
@@ -39,7 +39,7 @@ export async function signInWithGoogle() {
   const { data, error } = await supabase.auth.signInWithOAuth({
     provider: 'google',
     options: {
-      redirectTo: `${window.location.origin}/dashboard`
+      redirectTo: `${window.location.origin}/verify-email`
     }
   })
 

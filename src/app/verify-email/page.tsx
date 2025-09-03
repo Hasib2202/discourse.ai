@@ -1,0 +1,283 @@
+"use client";
+
+import { useEffect, useState } from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { MessageSquare, CheckCircle, Mail, ArrowRight } from "lucide-react";
+import { motion } from "framer-motion";
+import Link from "next/link";
+import { supabase } from "@/lib/supabase";
+import { useSearchParams } from "next/navigation";
+
+export default function VerifyEmailPage() {
+  const [verificationStatus, setVerificationStatus] = useState<
+    "loading" | "success" | "error"
+  >("loading");
+  const [userEmail, setUserEmail] = useState<string>("");
+  const searchParams = useSearchParams();
+
+  useEffect(() => {
+    async function handleEmailVerification() {
+      try {
+        // Check if there's a session (user just verified email)
+        const {
+          data: { session },
+          error,
+        } = await supabase.auth.getSession();
+
+        if (error) {
+          console.error("Session error:", error);
+          setVerificationStatus("error");
+          return;
+        }
+
+        if (session?.user) {
+          setUserEmail(session.user.email || "");
+          setVerificationStatus("success");
+
+          // Sign out the user so they can sign in properly
+          await supabase.auth.signOut();
+        } else {
+          // Check URL parameters for verification tokens
+          const accessToken = searchParams.get("access_token");
+          const refreshToken = searchParams.get("refresh_token");
+
+          if (accessToken && refreshToken) {
+            // Set the session with the tokens from URL
+            const { data, error: authError } = await supabase.auth.setSession({
+              access_token: accessToken,
+              refresh_token: refreshToken,
+            });
+
+            if (authError) {
+              setVerificationStatus("error");
+            } else if (data.user) {
+              setUserEmail(data.user.email || "");
+              setVerificationStatus("success");
+              // Sign out after verification
+              await supabase.auth.signOut();
+            } else {
+              setVerificationStatus("error");
+            }
+          } else {
+            setVerificationStatus("error");
+          }
+        }
+      } catch (error) {
+        console.error("Verification error:", error);
+        setVerificationStatus("error");
+      }
+    }
+
+    handleEmailVerification();
+  }, [searchParams]);
+
+  return (
+    <div className="min-h-screen w-full bg-[#091717] flex items-center justify-center p-4 overflow-hidden relative">
+      {/* Background Effects */}
+      <div className="absolute inset-0 overflow-hidden">
+        <div className="absolute inset-0 opacity-20">
+          <div
+            className="absolute inset-0"
+            style={{
+              background: `
+              radial-gradient(circle at 20% 80%, rgba(32, 128, 141, 0.1) 0%, transparent 50%),
+              radial-gradient(circle at 80% 20%, rgba(46, 86, 94, 0.1) 0%, transparent 50%),
+              radial-gradient(circle at 40% 40%, rgba(32, 128, 141, 0.05) 0%, transparent 50%)
+            `,
+            }}
+          />
+        </div>
+
+        <motion.div
+          className="absolute top-1/4 left-1/4 w-64 h-64 bg-gradient-to-br from-[#20808D]/10 to-transparent rounded-full blur-3xl"
+          animate={{
+            rotate: 360,
+            scale: [1, 1.2, 1],
+          }}
+          transition={{
+            rotate: { duration: 25, repeat: Infinity, ease: "linear" },
+            scale: { duration: 8, repeat: Infinity, ease: "easeInOut" },
+          }}
+        />
+        <motion.div
+          className="absolute bottom-1/4 right-1/4 w-48 h-48 bg-gradient-to-br from-[#2E565E]/10 to-transparent rounded-full blur-3xl"
+          animate={{
+            rotate: -360,
+            scale: [1, 0.8, 1],
+          }}
+          transition={{
+            rotate: { duration: 20, repeat: Infinity, ease: "linear" },
+            scale: { duration: 6, repeat: Infinity, ease: "easeInOut" },
+          }}
+        />
+      </div>
+
+      {/* Main Content */}
+      <div className="relative z-10 w-full max-w-md">
+        {/* Header */}
+        <motion.div
+          initial={{ opacity: 0, y: -30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8 }}
+          className="mb-8 text-center"
+        >
+          <Link
+            href="/"
+            className="inline-flex items-center mb-6 space-x-3 group"
+          >
+            <div className="relative">
+              <div className="absolute inset-0 bg-gradient-to-br from-[#20808D] to-[#2E565E] rounded-2xl blur-lg opacity-50 group-hover:opacity-100 transition-opacity duration-300"></div>
+              <div className="relative w-12 h-12 bg-gradient-to-br from-[#20808D] to-[#2E565E] rounded-2xl flex items-center justify-center shadow-2xl border border-white/10">
+                <MessageSquare className="w-6 h-6 text-white" />
+              </div>
+            </div>
+            <span className="text-2xl font-bold bg-gradient-to-r from-white via-[#20808D] to-white bg-clip-text text-transparent">
+              Discourse
+            </span>
+          </Link>
+        </motion.div>
+
+        {/* Verification Card */}
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8, delay: 0.2 }}
+        >
+          <Card
+            className="border-0 backdrop-blur-xl"
+            style={{
+              background: `linear-gradient(135deg, rgba(19, 52, 59, 0.8), rgba(46, 86, 94, 0.6))`,
+              boxShadow: `0 25px 50px rgba(32, 128, 141, 0.2), 0 0 0 1px rgba(32, 128, 141, 0.1)`,
+            }}
+          >
+            <CardHeader className="text-center">
+              <CardTitle className="text-white flex items-center justify-center space-x-2">
+                {verificationStatus === "loading" && (
+                  <>
+                    <Mail className="w-5 h-5 text-[#20808D]" />
+                    <span>Verifying Email...</span>
+                  </>
+                )}
+                {verificationStatus === "success" && (
+                  <>
+                    <CheckCircle className="w-5 h-5 text-green-400" />
+                    <span>Email Verified!</span>
+                  </>
+                )}
+                {verificationStatus === "error" && (
+                  <>
+                    <Mail className="w-5 h-5 text-red-400" />
+                    <span>Verification Failed</span>
+                  </>
+                )}
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="p-6 text-center">
+              {verificationStatus === "loading" && (
+                <div className="text-white/80">
+                  <div className="w-8 h-8 border-2 border-[#20808D] border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+                  <p>Please wait while we verify your email address...</p>
+                </div>
+              )}
+
+              {verificationStatus === "success" && (
+                <div className="space-y-4">
+                  <div className="text-center">
+                    <div className="w-16 h-16 bg-green-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
+                      <CheckCircle className="w-8 h-8 text-green-400" />
+                    </div>
+                    <h2 className="text-xl font-semibold text-white mb-2">
+                      🎉 Verification Successful!
+                    </h2>
+                    <p className="text-white/80 mb-2">
+                      Your email address has been successfully verified.
+                    </p>
+                    {userEmail && (
+                      <p className="text-sm text-[#20808D] mb-4">{userEmail}</p>
+                    )}
+                    <p className="text-white/70 text-sm mb-6">
+                      You can now sign in to your account and start using
+                      Discourse.
+                    </p>
+                  </div>
+
+                  <motion.div
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                  >
+                    <Link href="/login">
+                      <Button className="w-full bg-gradient-to-r from-[#20808D] to-[#2E565E] hover:from-[#20808D]/90 hover:to-[#2E565E]/90 text-white py-3 shadow-xl shadow-[#20808D]/30 border border-white/10 backdrop-blur-sm transition-all duration-300">
+                        Sign In Now
+                        <ArrowRight className="w-5 h-5 ml-2" />
+                      </Button>
+                    </Link>
+                  </motion.div>
+                </div>
+              )}
+
+              {verificationStatus === "error" && (
+                <div className="space-y-4">
+                  <div className="text-center">
+                    <div className="w-16 h-16 bg-red-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
+                      <Mail className="w-8 h-8 text-red-400" />
+                    </div>
+                    <h2 className="text-xl font-semibold text-white mb-2">
+                      Verification Failed
+                    </h2>
+                    <p className="text-white/80 mb-4">
+                      We couldn&apos;t verify your email address. This could be
+                      due to:
+                    </p>
+                    <ul className="text-sm text-white/70 text-left space-y-1 mb-6">
+                      <li>• The verification link has expired</li>
+                      <li>• The link has already been used</li>
+                      <li>• Invalid or corrupted link</li>
+                    </ul>
+                  </div>
+
+                  <div className="space-y-3">
+                    <Link href="/signup">
+                      <Button
+                        variant="outline"
+                        className="w-full border-[#20808D]/30 text-white hover:bg-[#20808D]/10 backdrop-blur-sm transition-all duration-300"
+                      >
+                        Try Signing Up Again
+                      </Button>
+                    </Link>
+                    <Link href="/login">
+                      <Button
+                        variant="ghost"
+                        className="w-full text-[#20808D] hover:text-[#20808D]/80 hover:bg-[#20808D]/10 transition-all duration-300"
+                      >
+                        Already have an account? Sign In
+                      </Button>
+                    </Link>
+                  </div>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </motion.div>
+
+        {/* Footer */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8, delay: 0.4 }}
+          className="mt-6 text-center"
+        >
+          <p className="text-white/60 text-sm">
+            Need help?{" "}
+            <Link
+              href="/"
+              className="text-[#20808D] hover:text-[#20808D]/80 transition-colors"
+            >
+              Contact Support
+            </Link>
+          </p>
+        </motion.div>
+      </div>
+    </div>
+  );
+}
