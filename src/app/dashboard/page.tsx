@@ -83,9 +83,11 @@ export default function DashboardPage() {
   >("classic");
   const [maxParticipants, setMaxParticipants] = useState(10);
   const [isPrivate, setIsPrivate] = useState(false);
+  const [isCreatingRoom, setIsCreatingRoom] = useState(false);
 
   // Join Room Form
   const [joinCode, setJoinCode] = useState("");
+  const [selectedRoomToJoin, setSelectedRoomToJoin] = useState<string>("");
 
   const checkUser = useCallback(async () => {
     try {
@@ -262,8 +264,9 @@ export default function DashboardPage() {
 
   const handleCreateRoom = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!user) return;
+    if (!user || isCreatingRoom) return;
 
+    setIsCreatingRoom(true);
     try {
       const { data, error } = await supabase
         .from("rooms")
@@ -301,6 +304,8 @@ export default function DashboardPage() {
     } catch (error) {
       console.error("Error creating room:", error);
       toast.error("Failed to create room");
+    } finally {
+      setIsCreatingRoom(false);
     }
   };
 
@@ -334,6 +339,7 @@ export default function DashboardPage() {
     if (!user) return;
 
     try {
+      // Find room by code
       const { data: roomData, error: roomError } = await supabase
         .from("rooms")
         .select("*")
@@ -341,7 +347,13 @@ export default function DashboardPage() {
         .single();
 
       if (roomError || !roomData) {
-        toast.error("Room not found");
+        toast.error("Invalid room code. Please check and try again.");
+        return;
+      }
+
+      // If we have a selected room, verify the code matches
+      if (selectedRoomToJoin && roomData.id !== selectedRoomToJoin) {
+        toast.error("Room code doesn't match the selected room.");
         return;
       }
 
@@ -359,6 +371,10 @@ export default function DashboardPage() {
         .single();
 
       if (existingParticipant) {
+        toast.success("You're already a participant in this room!");
+        setShowJoinRoom(false);
+        setJoinCode("");
+        setSelectedRoomToJoin("");
         router.push(`/room/${roomData.id}`);
         return;
       }
@@ -375,6 +391,7 @@ export default function DashboardPage() {
       toast.success("Joined room successfully!");
       setShowJoinRoom(false);
       setJoinCode("");
+      setSelectedRoomToJoin("");
       router.push(`/room/${roomData.id}`);
     } catch (error) {
       console.error("Error joining room:", error);
@@ -855,22 +872,41 @@ export default function DashboardPage() {
                     </div>
 
                     <div className="flex items-center justify-between mb-6">
-                      <div className="flex items-center space-x-3">
-                        <span className="text-sm font-medium text-white/60">
-                          Room Code:
-                        </span>
-                        <code className="bg-[#20808D]/25 text-[#20808D] px-3 py-1 rounded-lg text-sm font-mono font-bold tracking-wider border border-[#20808D]/30">
-                          {room.room_code}
-                        </code>
-                        <Button
-                          size="sm"
-                          variant="ghost"
-                          onClick={() => copyRoomCode(room.room_code)}
-                          className="h-8 w-8 p-0 hover:bg-[#20808D]/20 text-[#20808D]"
-                        >
-                          <Copy className="w-4 h-4" />
-                        </Button>
-                      </div>
+                      {isOwner ? (
+                        // Show room code only to room owner
+                        <div className="flex items-center space-x-3">
+                          <span className="text-sm font-medium text-white/60">
+                            Room Code:
+                          </span>
+                          <code className="bg-[#20808D]/25 text-[#20808D] px-3 py-1 rounded-lg text-sm font-mono font-bold tracking-wider border border-[#20808D]/30">
+                            {room.room_code}
+                          </code>
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            onClick={() => copyRoomCode(room.room_code)}
+                            className="h-8 w-8 p-0 hover:bg-[#20808D]/20 text-[#20808D]"
+                          >
+                            <Copy className="w-4 h-4" />
+                          </Button>
+                        </div>
+                      ) : (
+                        // Show status for non-owners
+                        <div className="flex items-center space-x-2">
+                          <div
+                            className={`w-2 h-2 rounded-full ${
+                              room.status === "waiting"
+                                ? "bg-green-400"
+                                : room.status === "active"
+                                ? "bg-yellow-400"
+                                : "bg-red-400"
+                            }`}
+                          />
+                          <span className="text-sm capitalize text-white/60">
+                            {room.status}
+                          </span>
+                        </div>
+                      )}
                     </div>
 
                     <motion.div
@@ -879,10 +915,17 @@ export default function DashboardPage() {
                     >
                       <Button
                         className="w-full bg-gradient-to-r from-[#20808D]/30 to-[#2E565E]/30 hover:from-[#20808D] hover:to-[#2E565E] text-white border-2 border-[#20808D]/50 hover:border-[#20808D] transition-all duration-300 py-3 text-lg font-semibold shadow-lg"
-                        onClick={() => router.push(`/room/${room.id}`)}
+                        onClick={() => {
+                          if (isOwner) {
+                            router.push(`/room/${room.id}`);
+                          } else {
+                            setShowJoinRoom(true);
+                            setSelectedRoomToJoin(room.id);
+                          }
+                        }}
                       >
                         <Eye className="w-5 h-5 mr-2" />
-                        Join Room
+                        {isOwner ? "Enter Room" : "Join with Code"}
                       </Button>
                     </motion.div>
                   </CardContent>
@@ -1030,9 +1073,10 @@ export default function DashboardPage() {
                   <div className="flex gap-4 pt-4">
                     <Button
                       type="submit"
-                      className="flex-1 bg-gradient-to-r from-[#20808D] to-[#2E565E] hover:from-[#20808D]/90 hover:to-[#2E565E]/90 text-white py-4 text-lg font-semibold shadow-xl"
+                      disabled={isCreatingRoom}
+                      className="flex-1 bg-gradient-to-r from-[#20808D] to-[#2E565E] hover:from-[#20808D]/90 hover:to-[#2E565E]/90 text-white py-4 text-lg font-semibold shadow-xl disabled:opacity-50 disabled:cursor-not-allowed"
                     >
-                      Create Room
+                      {isCreatingRoom ? "Creating..." : "Create Room"}
                     </Button>
                     <Button
                       type="button"
