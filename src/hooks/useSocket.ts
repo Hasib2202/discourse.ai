@@ -184,12 +184,11 @@ export const useSocket = ({ roomId, userId, userName }: UseSocketProps) => {
     const updateAudioStatus = useCallback((isMuted: boolean, isStreaming: boolean) => {
         if (socketRef.current) {
             socketRef.current.emit('audio-status', {
-                userId,
-                muted: isMuted,
-                streaming: isStreaming,
+                isMuted,
+                isStreaming,
             });
         }
-    }, [userId]);
+    }, []);
 
     const sendSpeakingStatus = useCallback((isSpeaking: boolean, volume?: number) => {
         if (socketRef.current) {
