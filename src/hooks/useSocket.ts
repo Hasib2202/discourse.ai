@@ -76,7 +76,7 @@ export const useSocket = ({ roomId, userId, userName }: UseSocketProps) => {
         });
 
         // Room events
-        socket.on('room-participants', (participantList: string[]) => {
+        socket.on('participants-updated', (participantList: string[]) => {
             console.log('👥 Room participants updated:', participantList);
             setParticipants(participantList);
         });
