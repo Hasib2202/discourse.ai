@@ -27,7 +27,7 @@ export const useSocket = ({ roomId, userId, userName }: UseSocketProps) => {
     useEffect(() => {
         // Get socket URL from environment variable or fallback to localhost
         const socketUrl = process.env.NEXT_PUBLIC_SOCKET_URL || 'http://localhost:3001';
-        
+
         console.log('🔌 Connecting to Socket.IO server:', socketUrl);
 
         // Initialize Socket.IO connection with environment-aware URL
@@ -66,11 +66,12 @@ export const useSocket = ({ roomId, userId, userName }: UseSocketProps) => {
         socket.on('connect_error', (error) => {
             console.error('❌ Socket.IO connection error:', error);
             setIsConnected(false);
-            
+
             // Show user-friendly message for production deployment issues
             if (error.message.includes('websocket error') || error.message.includes('Transport unknown')) {
-                console.log('💡 Tip: Make sure the Socket.IO server is deployed and the NEXT_PUBLIC_SOCKET_URL environment variable is set correctly.');
+                console.log('💡 Tip: Make sure the Socket.IO server is deployed to Render and the NEXT_PUBLIC_SOCKET_URL environment variable is set correctly.');
                 console.log('🔗 Current socket URL:', socketUrl);
+                console.log('📖 See RENDER_DEPLOYMENT.md for deployment instructions');
             }
         });
 

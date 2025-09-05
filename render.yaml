@@ -1,0 +1,13 @@
+services:
+  - type: web
+    name: discourse-socket-server
+    runtime: node
+    rootDir: socket-server
+    buildCommand: npm install
+    startCommand: npm start
+    plan: free
+    envVars:
+      - key: NODE_ENV
+        value: production
+    healthCheckPath: /health
+    autoDeploy: true

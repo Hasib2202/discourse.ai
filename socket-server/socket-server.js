@@ -11,14 +11,15 @@ const httpServer = createServer();
 const roomParticipants = new Map();
 const participantInfo = new Map();
 
-// Create Socket.IO server with CORS configuration
+// Create Socket.IO server with CORS configuration for Render deployment
 const io = new Server(httpServer, {
     cors: {
         origin: [
-            "http://localhost:3000", 
+            "http://localhost:3000",
             "https://discourse-frontend-git-dev-hasib2202s-projects.vercel.app",
             "https://discourse-frontend-2qeli4eai-hasib2202s-projects.vercel.app",
-            /\.vercel\.app$/
+            /\.vercel\.app$/,
+            /\.onrender\.com$/
         ],
         methods: ["GET", "POST"],
         credentials: true
@@ -34,7 +35,7 @@ io.on('connection', (socket) => {
     // Join room
     socket.on('join-room', ({ roomId, userId, userName }) => {
         console.log(`👤 ${userName} (${userId}) joining room ${roomId}`);
-        
+
         socket.join(roomId);
         socket.userId = userId;
         socket.userName = userName;
@@ -81,9 +82,9 @@ io.on('connection', (socket) => {
         if (userInfo) {
             userInfo.isMuted = isMuted;
             userInfo.isStreaming = isStreaming;
-            
+
             console.log(`🎤 ${socket.userId} audio status: muted=${isMuted}, streaming=${isStreaming}`);
-            
+
             // Broadcast to other participants in the room
             socket.to(socket.roomId).emit('participant-audio-update', {
                 userId: socket.userId,
@@ -100,9 +101,9 @@ io.on('connection', (socket) => {
         const userInfo = participantInfo.get(socket.userId);
         if (userInfo) {
             userInfo.isSpeaking = isSpeaking;
-            
+
             console.log(`🗣️ Speaking status: ${socket.userName} is ${isSpeaking ? 'speaking' : 'not speaking'} (volume: ${volume || 0})`);
-            
+
             // Broadcast to all participants in the room (including sender for consistency)
             io.to(socket.roomId).emit('speaking-update', {
                 userId: socket.userId,
@@ -118,9 +119,9 @@ io.on('connection', (socket) => {
         const userInfo = participantInfo.get(socket.userId);
         if (userInfo) {
             userInfo.isRaised = isRaised;
-            
+
             console.log(`📊 Participant status: ${socket.userName} hand-${isRaised ? 'raised' : 'lowered'}`);
-            
+
             // Broadcast to other participants in the room
             socket.to(socket.roomId).emit('participant-hand-update', {
                 userId: socket.userId,
@@ -133,7 +134,7 @@ io.on('connection', (socket) => {
     // Handle chat messages
     socket.on('chat-message', ({ message }) => {
         console.log(`💬 Chat message from ${socket.userName}: ${message}`);
-        
+
         // Broadcast to all participants in the room
         io.to(socket.roomId).emit('chat-message', {
             id: `${socket.userId}-${Date.now()}`,
@@ -147,16 +148,16 @@ io.on('connection', (socket) => {
     // Handle disconnect
     socket.on('disconnect', () => {
         console.log('❌ Client disconnected:', socket.id);
-        
+
         if (socket.userId && socket.roomId) {
             console.log(`📊 User ${socket.userId} left room ${socket.roomId}`);
-            
+
             // Remove from room participants
             const roomUsers = roomParticipants.get(socket.roomId);
             if (roomUsers) {
                 roomUsers.delete(socket.userId);
                 console.log(`📊 Room ${socket.roomId} now has ${roomUsers.size} participants`);
-                
+
                 // If room is empty, remove it
                 if (roomUsers.size === 0) {
                     roomParticipants.delete(socket.roomId);
@@ -166,10 +167,10 @@ io.on('connection', (socket) => {
                     io.to(socket.roomId).emit('participants-updated', Array.from(roomUsers));
                 }
             }
-            
+
             // Remove participant info
             participantInfo.delete(socket.userId);
-            
+
             // Notify other participants
             socket.to(socket.roomId).emit('participant-status', {
                 userId: socket.userId,
@@ -184,8 +185,8 @@ io.on('connection', (socket) => {
 httpServer.on('request', (req, res) => {
     if (req.url === '/health') {
         res.writeHead(200, { 'Content-Type': 'application/json' });
-        res.end(JSON.stringify({ 
-            status: 'ok', 
+        res.end(JSON.stringify({
+            status: 'ok',
             timestamp: new Date().toISOString(),
             connections: io.engine.clientsCount,
             rooms: roomParticipants.size
