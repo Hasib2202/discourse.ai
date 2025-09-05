@@ -112,7 +112,7 @@ export const useSocket = ({ roomId, userId, userName }: UseSocketProps) => {
             });
         });
 
-        socket.on('audio-status-update', (data: ParticipantStatus) => {
+        socket.on('participant-audio-update', (data: ParticipantStatus) => {
             console.log('🎤 Audio status update received:', data);
             setParticipantStatus(prev => {
                 const newMap = new Map(prev);
@@ -140,6 +140,18 @@ export const useSocket = ({ roomId, userId, userName }: UseSocketProps) => {
                     return newMap;
                 }
                 return prev; // Return previous state if nothing changed
+            });
+        });
+
+        socket.on('participant-hand-update', (data: { userId: string; userName: string; isRaised: boolean }) => {
+            console.log('✋ Hand raise update:', data);
+            setParticipantStatus(prev => {
+                const newMap = new Map(prev);
+                const existing = newMap.get(data.userId) || { userId: data.userId, isMuted: false, isStreaming: false };
+
+                // Update the hand raised status
+                newMap.set(data.userId, { ...existing, isRaised: data.isRaised });
+                return newMap;
             });
         });
 
@@ -192,14 +204,11 @@ export const useSocket = ({ roomId, userId, userName }: UseSocketProps) => {
 
     const toggleHandRaise = useCallback((isRaised: boolean) => {
         if (socketRef.current) {
-            socketRef.current.emit('participant-status', {
-                userId,
-                userName,
-                status: isRaised ? 'hand-raised' : 'hand-lowered',
-                handRaised: isRaised,
+            socketRef.current.emit('hand-status', {
+                isRaised,
             });
         }
-    }, [userId, userName]);
+    }, []);
 
     const sendAudioData = useCallback((audioData: ArrayBuffer) => {
         if (socketRef.current) {
