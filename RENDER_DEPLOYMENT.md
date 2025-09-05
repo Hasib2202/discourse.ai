@@ -11,6 +11,7 @@ This guide will help you deploy your Socket.IO server to Render using either the
 ## � Option 1: CLI Deployment (Recommended - Fastest)
 
 ### Step 1: Install Render CLI
+
 ```bash
 # Install globally
 npm install -g @render-com/cli
@@ -20,26 +21,33 @@ npx @render-com/cli --version
 ```
 
 ### Step 2: Login to Render
+
 ```bash
 npx @render-com/cli login
 ```
+
 This will open your browser to authenticate with Render.
 
 ### Step 3: Deploy with One Command
+
 ```bash
 # From your project root directory
 npx @render-com/cli deploy --config render.yaml
 ```
 
 ### Step 4: Get Your Service URL
+
 After deployment completes, the CLI will show your service URL:
+
 ```
 ✅ Service deployed successfully!
 🌐 Your service is available at: https://discourse-socket-server.onrender.com
 ```
 
 ### Step 5: Update Frontend Environment Variable
+
 Copy the URL and update your Vercel environment variables:
+
 ```
 NEXT_PUBLIC_SOCKET_URL = https://discourse-socket-server.onrender.com
 ```

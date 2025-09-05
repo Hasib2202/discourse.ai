@@ -27,19 +27,19 @@ function checkPrerequisites() {
     log('🚀 Render Deployment Helper', 'green');
     log('===============================', 'green');
     log('');
-    
+
     // Check if render.yaml exists
     if (!fs.existsSync('render.yaml')) {
         log('❌ render.yaml not found!', 'red');
         process.exit(1);
     }
-    
+
     // Check if socket-server directory exists
     if (!fs.existsSync('socket-server')) {
         log('❌ socket-server directory not found!', 'red');
         process.exit(1);
     }
-    
+
     // Check git status
     try {
         const gitStatus = execSync('git status --porcelain', { encoding: 'utf8' });
@@ -51,7 +51,7 @@ function checkPrerequisites() {
     } catch (error) {
         log('⚠️  Warning: Could not check git status', 'yellow');
     }
-    
+
     // Check current branch
     try {
         const currentBranch = execSync('git branch --show-current', { encoding: 'utf8' }).trim();
@@ -61,7 +61,7 @@ function checkPrerequisites() {
     } catch (error) {
         log('⚠️  Could not determine current branch', 'yellow');
     }
-    
+
     log('📋 Prerequisites Check:', 'cyan');
     log('✅ render.yaml configuration exists', 'green');
     log('✅ socket-server directory exists', 'green');
@@ -101,7 +101,7 @@ function showPostDeployment() {
     log('   NEXT_PUBLIC_SOCKET_URL = https://discourse-socket-server.onrender.com', 'yellow');
     log('3. Redeploy your Vercel frontend', 'white');
     log('');
-    
+
     log('✨ Your render.yaml configuration will automatically set up:', 'green');
     log('   • Service name: discourse-socket-server', 'white');
     log('   • Auto-deploy on dev branch pushes', 'white');
@@ -112,10 +112,10 @@ function showPostDeployment() {
 
 function openRenderDashboard() {
     log('🌐 Opening Render dashboard...', 'green');
-    
+
     const { spawn } = require('child_process');
     const url = 'https://render.com/dashboard';
-    
+
     let command;
     switch (process.platform) {
         case 'darwin': // macOS
@@ -128,7 +128,7 @@ function openRenderDashboard() {
             command = 'xdg-open';
             break;
     }
-    
+
     try {
         if (process.platform === 'win32') {
             spawn('cmd', ['/c', 'start', url], { detached: true });
@@ -147,7 +147,7 @@ function main() {
     showDeploymentSteps();
     showPostDeployment();
     openRenderDashboard();
-    
+
     log('🎉 Ready to deploy! Follow the steps above.', 'green');
 }
 
