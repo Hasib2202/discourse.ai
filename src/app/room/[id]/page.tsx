@@ -138,8 +138,8 @@ export default function RoomLobbyPage() {
         },
         (payload) => {
           if (payload.new.status === "active") {
-            // Navigate to active debate interface
-            router.push(`/room/${roomId}/debate`);
+            // Navigate to active meeting interface (Google Meet style)
+            router.push(`/room/${roomId}/meeting`);
           } else {
             loadRoom();
           }

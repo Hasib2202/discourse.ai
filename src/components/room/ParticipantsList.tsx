@@ -14,8 +14,7 @@ import {
   UserMinus, 
   UserPlus, 
   CheckCircle2,
-  Clock,
-  MoreVertical
+  Clock
 } from "lucide-react"
 import { motion, AnimatePresence } from "framer-motion"
 import { supabase } from "@/lib/supabase"
@@ -226,6 +225,20 @@ export default function ParticipantsList({
                         className="w-4 h-4" 
                         style={{ color: getStatusColor(participant.status, !!participant.ready_at) }}
                       />
+                      
+                      {/* Allow host to change their own role to debater */}
+                      {isHost && isCurrentUser && participant.role === "host" && (
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          onClick={() => handleRoleChange(participant.id, "debater")}
+                          disabled={actionLoading === participant.id}
+                          className="h-8 px-2 text-xs hover:bg-[#20808D]/20 text-[#20808D] border border-[#20808D]/40"
+                          title="Join as Debater"
+                        >
+                          Join as Debater
+                        </Button>
+                      )}
                     </div>
                   </motion.div>
                 )
