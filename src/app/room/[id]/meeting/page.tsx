@@ -3,10 +3,10 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { motion } from "framer-motion";
 import { getCurrentUser } from "@/lib/auth";
 import { supabase } from "@/lib/supabase";
-import LoadingSpinner from "@/components/ui/LoadingSpinner";
-import GoogleMeetInterface from "@/components/meet/GoogleMeetInterface";
+import SocketGoogleMeetInterface from "@/components/meet/SocketGoogleMeetInterface";
 
 interface Room {
   id: string;
@@ -102,10 +102,7 @@ export default function MeetingRoomPage({ params }: Props) {
 
         // Fetch participants data
         const { data: participantsData, error: participantsError } =
-          await supabase
-            .from("participants")
-            .select("*")
-            .eq("room_id", roomId);
+          await supabase.from("participants").select("*").eq("room_id", roomId);
 
         if (participantsError) {
           console.error("Error fetching participants:", participantsError);
@@ -121,7 +118,10 @@ export default function MeetingRoomPage({ params }: Props) {
 
               return {
                 ...participant,
-                role: participant.role === "debater" ? "participant" : participant.role,
+                role:
+                  participant.role === "debater"
+                    ? "participant"
+                    : participant.role,
                 profiles: profileData || {
                   full_name: "Unknown User",
                   avatar_url: null,
@@ -129,7 +129,7 @@ export default function MeetingRoomPage({ params }: Props) {
               };
             })
           );
-          
+
           setParticipants(participantsWithProfiles);
         }
       } catch (error) {
@@ -241,30 +241,46 @@ export default function MeetingRoomPage({ params }: Props) {
 
   // Show loading spinner while authentication or room data is loading
   if (authLoading || loading) {
-    return <LoadingSpinner text="Joining meeting..." />;
+    return (
+      <div className="min-h-screen bg-[#091717] flex items-center justify-center">
+        <motion.div
+          animate={{ rotate: 360 }}
+          transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+          className="w-12 h-12 border-4 border-[#20808D] border-t-transparent rounded-full"
+        />
+      </div>
+    );
   }
 
   // Redirect if not authenticated
   if (!user) {
     router.push("/login");
-    return <LoadingSpinner text="Redirecting to login..." />;
+    return (
+      <div className="min-h-screen bg-[#091717] flex items-center justify-center">
+        <motion.div
+          animate={{ rotate: 360 }}
+          transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+          className="w-12 h-12 border-4 border-[#20808D] border-t-transparent rounded-full"
+        />
+      </div>
+    );
   }
 
   // Show error if room not found
   if (!room) {
     return (
-      <div className="min-h-screen bg-[#1a1a1a] flex items-center justify-center">
+      <div className="min-h-screen bg-[#091717] flex items-center justify-center">
         <div className="text-center">
           <h1 className="text-2xl font-bold text-white mb-4">
             Meeting Not Found
           </h1>
-          <p className="text-gray-400 mb-6">
+          <p className="text-white/70 mb-6">
             The meeting room you&apos;re looking for doesn&apos;t exist or has
             been removed.
           </p>
           <button
             onClick={() => router.push("/dashboard")}
-            className="px-6 py-2 bg-[#34a853] text-white rounded-lg hover:bg-[#2d8f47]"
+            className="bg-[#20808D] hover:bg-[#20808D]/90 text-white px-6 py-3 rounded-lg transition-colors"
           >
             Back to Dashboard
           </button>
@@ -279,7 +295,7 @@ export default function MeetingRoomPage({ params }: Props) {
     currentParticipant?.profiles.full_name || user.email || "Unknown User";
 
   return (
-    <GoogleMeetInterface
+    <SocketGoogleMeetInterface
       roomId={roomId}
       currentUser={user}
       participants={participants}

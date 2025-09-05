@@ -590,7 +590,6 @@ export default function RoomLobbyPage() {
                 room={room}
                 participants={participants}
                 onRoomUpdate={loadRoom}
-                onParticipantsUpdate={loadParticipants}
               />
             )}
           </motion.div>
