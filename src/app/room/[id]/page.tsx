@@ -86,6 +86,10 @@ export default function RoomLobbyPage() {
   const joiningRef = useRef(false);
   const initializedRef = useRef(false);
 
+  useEffect(() => {
+    document.title = "Lobby - Discourse AI";
+  }, []);
+
   // Real-time subscriptions
   const setupSubscriptions = useCallback(() => {
     // Participants subscription

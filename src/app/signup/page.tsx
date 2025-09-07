@@ -39,6 +39,10 @@ export default function SignupPage() {
   const router = useRouter();
 
   useEffect(() => {
+    document.title = "Sing-up - Discourse AI";
+  }, []);
+
+  useEffect(() => {
     // Generate particles on client side only to avoid hydration mismatch
     const generatedParticles = Array.from({ length: 80 }).map(() => ({
       left: Math.random() * 100,

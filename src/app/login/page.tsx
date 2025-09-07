@@ -33,6 +33,10 @@ export default function LoginPage() {
   const router = useRouter();
 
   useEffect(() => {
+    document.title = "Sign-in - Discourse AI";
+  }, []);
+
+  useEffect(() => {
     // Generate particles on client side only to avoid hydration mismatch
     const generatedParticles = Array.from({ length: 80 }).map(() => ({
       left: Math.random() * 100,
