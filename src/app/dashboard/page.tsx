@@ -75,6 +75,10 @@ export default function DashboardPage() {
   const [showProfile, setShowProfile] = useState(false);
   const router = useRouter();
 
+  useEffect(() => {
+    document.title = "Dashboard - Discourse AI";
+  }, []);
+
   // Create Room Form
   const [roomTitle, setRoomTitle] = useState("");
   const [roomTopic, setRoomTopic] = useState("");

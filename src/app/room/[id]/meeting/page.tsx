@@ -51,6 +51,10 @@ export default function MeetingRoomPage({ params }: Props) {
   const [loading, setLoading] = useState(true);
   const [roomId, setRoomId] = useState<string>("");
 
+  useEffect(() => {
+    document.title = "Meeting - Discourse AI";
+  }, []);
+
   // Get current user
   useEffect(() => {
     const fetchUser = async () => {
@@ -271,10 +275,10 @@ export default function MeetingRoomPage({ params }: Props) {
     return (
       <div className="min-h-screen bg-[#091717] flex items-center justify-center">
         <div className="text-center">
-          <h1 className="text-2xl font-bold text-white mb-4">
+          <h1 className="mb-4 text-2xl font-bold text-white">
             Meeting Not Found
           </h1>
-          <p className="text-white/70 mb-6">
+          <p className="mb-6 text-white/70">
             The meeting room you&apos;re looking for doesn&apos;t exist or has
             been removed.
           </p>

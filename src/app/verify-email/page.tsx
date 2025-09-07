@@ -17,6 +17,10 @@ function VerifyEmailContent() {
   const searchParams = useSearchParams();
 
   useEffect(() => {
+    document.title = "Verify Email - Discourse AI";
+  }, []);
+
+  useEffect(() => {
     async function handleEmailVerification() {
       try {
         // Check if there's a session (user just verified email)
