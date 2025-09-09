@@ -76,7 +76,7 @@ export const useSocket = ({ roomId, userId, userName }: UseSocketProps) => {
         });
 
         // Room events
-        socket.on('participants-updated', (participantList: string[]) => {
+        socket.on('room-participants', (participantList: string[]) => {
             console.log('👥 Room participants updated:', participantList);
             setParticipants(participantList);
         });
@@ -112,7 +112,7 @@ export const useSocket = ({ roomId, userId, userName }: UseSocketProps) => {
             });
         });
 
-        socket.on('participant-audio-update', (data: ParticipantStatus) => {
+        socket.on('audio-status-update', (data: ParticipantStatus) => {
             console.log('🎤 Audio status update received:', data);
             setParticipantStatus(prev => {
                 const newMap = new Map(prev);
@@ -184,11 +184,12 @@ export const useSocket = ({ roomId, userId, userName }: UseSocketProps) => {
     const updateAudioStatus = useCallback((isMuted: boolean, isStreaming: boolean) => {
         if (socketRef.current) {
             socketRef.current.emit('audio-status', {
-                isMuted,
-                isStreaming,
+                userId,
+                muted: isMuted,
+                streaming: isStreaming,
             });
         }
-    }, []);
+    }, [userId]);
 
     const sendSpeakingStatus = useCallback((isSpeaking: boolean, volume?: number) => {
         if (socketRef.current) {
@@ -203,11 +204,16 @@ export const useSocket = ({ roomId, userId, userName }: UseSocketProps) => {
 
     const toggleHandRaise = useCallback((isRaised: boolean) => {
         if (socketRef.current) {
+            console.log(`🤚 Emitting hand-status: ${userName} hand-${isRaised ? 'raised' : 'lowered'}`);
             socketRef.current.emit('hand-status', {
+                userId,
+                userName,
                 isRaised,
             });
+        } else {
+            console.error('❌ Socket not connected, cannot emit hand-status');
         }
-    }, []);
+    }, [userId, userName]);
 
     const sendAudioData = useCallback((audioData: ArrayBuffer) => {
         if (socketRef.current) {

@@ -48,16 +48,16 @@ export default function LandingPage() {
   ];
 
   const bgGridStyle = {
-    backgroundImage: `linear-gradient(rgba(32, 128, 141, 0.3) 1px, transparent 1px), linear-gradient(90deg, rgba(32, 128, 141, 0.3) 1px, transparent 1px)`,
+    backgroundImage: `linear-gradient(rgba(2, 189, 155, 0.3) 1px, transparent 1px), linear-gradient(90deg, rgba(2, 189, 155, 0.3) 1px, transparent 1px)`,
     backgroundSize: "60px 60px",
   };
 
   const backgroundMeshStyle = {
-    background: `radial-gradient(circle at 20% 80%, rgba(32, 128, 141, 0.1) 0%, transparent 50%), radial-gradient(circle at 80% 20%, rgba(46, 86, 94, 0.1) 0%, transparent 50%), radial-gradient(circle at 40% 40%, rgba(32, 128, 141, 0.05) 0%, transparent 50%)`,
+    background: `radial-gradient(circle at 20% 80%, rgba(2, 189, 155, 0.1) 0%, transparent 50%), radial-gradient(circle at 80% 20%, rgba(2, 189, 155, 0.08) 0%, transparent 50%), radial-gradient(circle at 40% 40%, rgba(2, 189, 155, 0.05) 0%, transparent 50%)`,
   };
 
   return (
-    <div className="min-h-screen w-full bg-[#091717] overflow-x-hidden relative">
+    <div className="min-h-screen w-full bg-[#040404] overflow-x-hidden relative">
       {/* Floating Background Particles */}
       <div className="fixed inset-0 z-0 pointer-events-none">
         {Array.from({ length: 100 }).map((_, i) => {
@@ -68,7 +68,7 @@ export default function LandingPage() {
           return (
             <motion.div
               key={i}
-              className="absolute w-1 h-1 bg-[#20808D]/20 rounded-full"
+              className="absolute w-1 h-1 bg-[#02BD9B]/20 rounded-full"
               style={{
                 left: `${leftPos}%`,
                 top: `${topPos}%`,
@@ -115,7 +115,7 @@ export default function LandingPage() {
 
           <motion.div
             style={{ y, opacity }}
-            className="absolute top-1/4 left-1/4 w-72 h-72 bg-gradient-to-br from-[#20808D]/20 to-transparent rounded-full blur-3xl"
+            className="absolute top-1/4 left-1/4 w-72 h-72 bg-gradient-to-br from-[#02BD9B]/20 to-transparent rounded-full blur-3xl"
             animate={{
               rotate: 360,
               scale: [1, 1.2, 1],
@@ -130,7 +130,7 @@ export default function LandingPage() {
               y: useTransform(scrollYProgress, [0, 1], ["0%", "-40%"]),
               opacity,
             }}
-            className="absolute bottom-1/4 right-1/4 w-64 h-64 bg-gradient-to-br from-[#2E565E]/20 to-transparent rounded-full blur-3xl"
+            className="absolute bottom-1/4 right-1/4 w-64 h-64 bg-gradient-to-br from-[#02BD9B]/15 to-transparent rounded-full blur-3xl"
             animate={{
               rotate: -360,
               scale: [1, 0.8, 1],
@@ -151,15 +151,15 @@ export default function LandingPage() {
             <motion.div
               animate={{
                 boxShadow: [
-                  "0 0 20px rgba(32, 128, 141, 0.3)",
-                  "0 0 40px rgba(32, 128, 141, 0.6)",
-                  "0 0 20px rgba(32, 128, 141, 0.3)",
+                  "0 0 20px rgba(2, 189, 155, 0.3)",
+                  "0 0 40px rgba(2, 189, 155, 0.6)",
+                  "0 0 20px rgba(2, 189, 155, 0.3)",
                 ],
               }}
               transition={{ duration: 3, repeat: Infinity }}
               className="inline-block"
             >
-              <Badge className="border-2 border-[#20808D]/40 text-[#20808D] bg-gradient-to-r from-[#20808D]/10 to-[#2E565E]/10 mb-0 px-6 py-2 backdrop-blur-xl shadow-2xl">
+              <Badge className="border-2 border-[#02BD9B]/40 text-[#02BD9B] bg-gradient-to-r from-[#02BD9B]/10 to-[#02BD9B]/5 mb-0 px-6 py-2 backdrop-blur-xl shadow-2xl">
                 AI-Powered Debate Platform
               </Badge>
             </motion.div>
@@ -182,9 +182,9 @@ export default function LandingPage() {
               initial={{ x: 100 }}
               animate={{ x: 0 }}
               transition={{ duration: 0.8, delay: 0.8 }}
-              className="bg-gradient-to-r from-[#20808D] via-white to-[#2E565E] bg-clip-text text-transparent"
+              className="bg-gradient-to-r from-[#02BD9B] via-white to-[#02BD9B] bg-clip-text text-transparent"
               style={{
-                filter: "drop-shadow(0 4px 20px rgba(32, 128, 141, 0.3))",
+                filter: "drop-shadow(0 4px 20px rgba(2, 189, 155, 0.3))",
               }}
             >
               Debate Skills
@@ -217,7 +217,7 @@ export default function LandingPage() {
             >
               <Button
                 size="lg"
-                className="bg-gradient-to-r from-[#20808D] to-[#2E565E] hover:from-[#20808D]/90 hover:to-[#2E565E]/90 text-white px-10 py-4 text-lg shadow-2xl shadow-[#20808D]/30 border border-white/10 backdrop-blur-sm"
+                className="bg-gradient-to-r from-[#02BD9B] to-[#02BD9B]/80 hover:from-[#02BD9B]/90 hover:to-[#02BD9B]/70 text-[#040404] font-semibold px-10 py-4 text-lg shadow-2xl shadow-[#02BD9B]/30 border border-[#02BD9B]/20 backdrop-blur-sm"
               >
                 Start Debating
                 <motion.div
@@ -233,7 +233,7 @@ export default function LandingPage() {
               <Button
                 size="lg"
                 variant="outline"
-                className="border-2 border-[#20808D]/50 text-white hover:bg-[#20808D]/10 backdrop-blur-xl px-10 py-4 text-lg shadow-xl"
+                className="border-2 border-[#02BD9B]/50 text-white hover:bg-[#02BD9B]/10 backdrop-blur-xl px-10 py-4 text-lg shadow-xl"
               >
                 <Play className="w-5 h-5 mr-2" />
                 Watch Demo
@@ -248,7 +248,7 @@ export default function LandingPage() {
             transition={{ duration: 0.8, delay: 1.4 }}
             className="mb-16"
           >
-            <div className="relative overflow-hidden bg-gradient-to-r from-[#20808D]/10 via-[#2E565E]/10 to-[#20808D]/10 backdrop-blur-xl border border-[#20808D]/20 rounded-2xl py-4 shadow-2xl">
+            <div className="relative overflow-hidden bg-gradient-to-r from-[#02BD9B]/10 via-[#02BD9B]/8 to-[#02BD9B]/10 backdrop-blur-xl border border-[#02BD9B]/20 rounded-2xl py-4 shadow-2xl">
               <motion.div
                 className="flex space-x-8 whitespace-nowrap"
                 animate={{ x: [0, -2000] }}
@@ -263,7 +263,7 @@ export default function LandingPage() {
                   marqueeItems.map((item, index) => (
                     <span
                       key={`${groupIndex}-${index}`}
-                      className="text-[#20808D] font-semibold text-lg whitespace-nowrap px-4"
+                      className="text-[#02BD9B] font-semibold text-lg whitespace-nowrap px-4"
                     >
                       {item}
                     </span>
@@ -292,8 +292,8 @@ export default function LandingPage() {
                 transition={{ delay: 1.8 + index * 0.1, type: "spring" }}
                 className="flex items-center space-x-2 cursor-pointer group"
               >
-                <item.icon className="h-5 w-5 text-[#20808D] group-hover:scale-110 transition-transform" />
-                <span className="group-hover:text-[#20808D] transition-colors">
+                <item.icon className="h-5 w-5 text-[#02BD9B] group-hover:scale-110 transition-transform" />
+                <span className="group-hover:text-[#02BD9B] transition-colors">
                   {item.text}
                 </span>
               </motion.div>
@@ -318,7 +318,7 @@ export default function LandingPage() {
 
       {/* Three Modes Section */}
       <section id="modes" className="relative w-full py-32">
-        <div className="absolute inset-0 bg-gradient-to-b from-[#091717] via-[#13343B]/20 to-[#091717]"></div>
+        <div className="absolute inset-0 bg-gradient-to-b from-[#040404] via-[#02BD9B]/5 to-[#040404]"></div>
         <div className="relative z-10 px-6 mx-auto max-w-7xl">
           <motion.div
             initial={{ opacity: 0, y: 50 }}
@@ -327,7 +327,7 @@ export default function LandingPage() {
             viewport={{ once: true }}
             className="mb-20 text-center"
           >
-            <Badge className="border-2 border-[#20808D]/40 text-[#20808D] bg-[#20808D]/10 mb-6 px-6 py-2 backdrop-blur-xl">
+            <Badge className="border-2 border-[#02BD9B]/40 text-[#02BD9B] bg-[#02BD9B]/10 mb-6 px-6 py-2 backdrop-blur-xl">
               Three Powerful Modes
             </Badge>
             <h2 className="mb-6 text-4xl font-bold text-white md:text-5xl">
@@ -352,8 +352,8 @@ export default function LandingPage() {
                   "Formal analysis",
                   "Educational feedback",
                 ],
-                gradient: "from-blue-500/20 to-[#20808D]/20",
-                glow: "#20808D",
+                gradient: "from-[#02BD9B]/15 to-[#02BD9B]/20",
+                glow: "#02BD9B",
               },
               {
                 icon: Brain,
@@ -366,8 +366,8 @@ export default function LandingPage() {
                   "Negotiation scenarios",
                   "Skill tracking",
                 ],
-                gradient: "from-[#20808D]/20 to-green-500/20",
-                glow: "#2E565E",
+                gradient: "from-[#02BD9B]/10 to-[#02BD9B]/20",
+                glow: "#02BD9B",
               },
               {
                 icon: Zap,
@@ -380,8 +380,8 @@ export default function LandingPage() {
                   "Interactive features",
                   "Community engagement",
                 ],
-                gradient: "from-purple-500/20 to-[#20808D]/20",
-                glow: "#20808D",
+                gradient: "from-[#02BD9B]/8 to-[#02BD9B]/15",
+                glow: "#02BD9B",
               },
             ].map((mode, index) => (
               <motion.div
@@ -401,8 +401,8 @@ export default function LandingPage() {
                 <Card
                   className="relative h-full overflow-hidden border-0 backdrop-blur-xl"
                   style={{
-                    background: `linear-gradient(135deg, rgba(19, 52, 59, 0.8), rgba(46, 86, 94, 0.6))`,
-                    boxShadow: `0 25px 50px rgba(32, 128, 141, 0.2), 0 0 0 1px rgba(32, 128, 141, 0.1)`,
+                    background: `linear-gradient(135deg, rgba(4, 4, 4, 0.9), rgba(2, 189, 155, 0.05))`,
+                    boxShadow: `0 25px 50px rgba(2, 189, 155, 0.2), 0 0 0 1px rgba(2, 189, 155, 0.1)`,
                   }}
                 >
                   <motion.div
@@ -442,7 +442,7 @@ export default function LandingPage() {
                       </motion.div>
 
                       <div>
-                        <h3 className="text-2xl font-bold text-white mb-4 group-hover:text-[#20808D] transition-colors duration-500">
+                        <h3 className="text-2xl font-bold text-white mb-4 group-hover:text-[#02BD9B] transition-colors duration-500">
                           {mode.title}
                         </h3>
                         <p className="leading-relaxed text-white/80">
@@ -460,7 +460,7 @@ export default function LandingPage() {
                             viewport={{ once: true }}
                             className="flex items-center space-x-3 text-white/80"
                           >
-                            <CheckCircle className="h-4 w-4 text-[#20808D] flex-shrink-0" />
+                            <CheckCircle className="h-4 w-4 text-[#02BD9B] flex-shrink-0" />
                             <span>{feature}</span>
                           </motion.li>
                         ))}
@@ -470,7 +470,7 @@ export default function LandingPage() {
                         whileHover={{ scale: 1.05 }}
                         whileTap={{ scale: 0.95 }}
                       >
-                        <Button className="w-full bg-[#20808D]/20 hover:bg-[#20808D] text-white border-2 border-[#20808D]/30 hover:border-[#20808D] transition-all duration-300 backdrop-blur-sm shadow-lg">
+                        <Button className="w-full bg-[#02BD9B]/20 hover:bg-[#02BD9B] text-white hover:text-[#040404] border-2 border-[#02BD9B]/30 hover:border-[#02BD9B] transition-all duration-300 backdrop-blur-sm shadow-lg font-medium">
                           Try {mode.title}
                           <ArrowRight className="w-4 h-4 ml-2 transition-transform group-hover:translate-x-1" />
                         </Button>
@@ -486,7 +486,7 @@ export default function LandingPage() {
 
       {/* AI Features Section */}
       <section id="features" className="relative w-full py-32 overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-b from-[#13343B]/30 via-[#091717] to-[#2E565E]/20"></div>
+        <div className="absolute inset-0 bg-gradient-to-b from-[#02BD9B]/5 via-[#040404] to-[#02BD9B]/3"></div>
 
         <div className="relative z-10 px-6 mx-auto max-w-7xl">
           <motion.div
@@ -496,7 +496,7 @@ export default function LandingPage() {
             viewport={{ once: true }}
             className="mb-20 text-center"
           >
-            <Badge className="border-2 border-[#20808D]/40 text-[#20808D] bg-[#20808D]/10 mb-6 px-6 py-2 backdrop-blur-xl">
+            <Badge className="border-2 border-[#02BD9B]/40 text-[#02BD9B] bg-[#02BD9B]/10 mb-6 px-6 py-2 backdrop-blur-xl">
               AI Intelligence Core
             </Badge>
             <h2 className="mb-6 text-4xl font-bold text-white md:text-5xl">
@@ -514,25 +514,25 @@ export default function LandingPage() {
                 icon: MessageSquare,
                 title: "Claim Extraction",
                 desc: "Automatically identify and structure key arguments with precision analysis",
-                color: "#20808D",
+                color: "#02BD9B",
               },
               {
                 icon: Shield,
                 title: "Fact Verification",
                 desc: "Real-time fact-checking with evidence sourcing and credibility scoring",
-                color: "#2E565E",
+                color: "#02BD9B",
               },
               {
                 icon: Brain,
                 title: "Logic Analysis",
                 desc: "Advanced reasoning evaluation detecting fallacies and argument structures",
-                color: "#20808D",
+                color: "#02BD9B",
               },
               {
                 icon: Mic,
                 title: "Smart Moderation",
                 desc: "Intelligent AI moderator ensuring balanced and productive discussions",
-                color: "#2E565E",
+                color: "#02BD9B",
               },
             ].map((feature, index) => (
               <motion.div
@@ -578,7 +578,7 @@ export default function LandingPage() {
                   </div>
                 </motion.div>
 
-                <h3 className="text-xl font-bold text-white mb-4 group-hover:text-[#20808D] transition-colors duration-300">
+                <h3 className="text-xl font-bold text-white mb-4 group-hover:text-[#02BD9B] transition-colors duration-300">
                   {feature.title}
                 </h3>
                 <p className="leading-relaxed text-white/70">{feature.desc}</p>
@@ -590,7 +590,7 @@ export default function LandingPage() {
 
       {/* Stats Section */}
       <section className="relative w-full py-24">
-        <div className="absolute inset-0 bg-gradient-to-r from-[#13343B]/40 via-[#091717] to-[#13343B]/40"></div>
+        <div className="absolute inset-0 bg-gradient-to-r from-[#02BD9B]/8 via-[#040404] to-[#02BD9B]/8"></div>
 
         <div className="relative z-10 max-w-5xl px-6 mx-auto">
           <motion.div
@@ -645,10 +645,10 @@ export default function LandingPage() {
                 whileHover={{ scale: 1.1, y: -5 }}
                 className="text-center group"
               >
-                <div className="w-16 h-16 bg-gradient-to-br from-[#20808D]/30 to-[#2E565E]/20 rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:bg-[#20808D]/40 transition-all duration-300 border border-[#20808D]/20 shadow-xl">
-                  <stat.icon className="h-7 w-7 text-[#20808D]" />
+                <div className="w-16 h-16 bg-gradient-to-br from-[#02BD9B]/30 to-[#02BD9B]/10 rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:bg-[#02BD9B]/40 transition-all duration-300 border border-[#02BD9B]/20 shadow-xl">
+                  <stat.icon className="h-7 w-7 text-[#02BD9B]" />
                 </div>
-                <div className="text-3xl font-bold text-[#20808D] mb-2">
+                <div className="text-3xl font-bold text-[#02BD9B] mb-2">
                   {stat.number}
                 </div>
                 <div className="text-white/60">{stat.label}</div>
@@ -660,7 +660,7 @@ export default function LandingPage() {
 
       {/* CTA Section */}
       <section className="relative w-full py-32 overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-t from-[#13343B]/30 to-[#091717]"></div>
+        <div className="absolute inset-0 bg-gradient-to-t from-[#02BD9B]/8 to-[#040404]"></div>
 
         <div className="relative z-10 max-w-5xl px-6 mx-auto text-center">
           <motion.div
@@ -672,7 +672,7 @@ export default function LandingPage() {
           >
             <h2 className="text-4xl font-bold leading-tight text-white md:text-5xl">
               Ready to Master
-              <span className="block text-[#20808D] mt-2">
+              <span className="block text-[#02BD9B] mt-2">
                 Your Debate Skills?
               </span>
             </h2>
@@ -689,7 +689,7 @@ export default function LandingPage() {
               >
                 <Button
                   size="lg"
-                  className="bg-gradient-to-r from-[#20808D] to-[#2E565E] hover:from-[#20808D]/90 hover:to-[#2E565E]/90 text-white px-12 py-4 text-lg shadow-2xl shadow-[#20808D]/40 border border-white/10"
+                  className="bg-gradient-to-r from-[#02BD9B] to-[#02BD9B]/80 hover:from-[#02BD9B]/90 hover:to-[#02BD9B]/70 text-[#040404] font-semibold px-12 py-4 text-lg shadow-2xl shadow-[#02BD9B]/40 border border-[#02BD9B]/20"
                 >
                   Start Free Trial
                   <ArrowRight className="w-5 h-5 ml-2" />
@@ -702,7 +702,7 @@ export default function LandingPage() {
                 <Button
                   size="lg"
                   variant="outline"
-                  className="border-2 border-[#20808D]/50 text-white hover:bg-[#20808D]/10 backdrop-blur-xl px-12 py-4 text-lg shadow-xl"
+                  className="border-2 border-[#02BD9B]/50 text-white hover:bg-[#02BD9B]/10 backdrop-blur-xl px-12 py-4 text-lg shadow-xl"
                 >
                   Contact Sales
                 </Button>

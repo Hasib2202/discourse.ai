@@ -120,7 +120,7 @@ export default function HostControls({
   };
 
   return (
-    <Card className="border-0 bg-gradient-to-br from-[#13343B]/80 to-[#2E565E]/40 backdrop-blur-xl">
+    <Card className="border-0 bg-gradient-to-br from-[#040404]/80 to-[#02BD9B]/40 backdrop-blur-xl">
       <CardHeader className="pb-3">
         <CardTitle className="flex items-center space-x-2 text-lg text-white">
           <Crown className="w-5 h-5 text-yellow-400" />
@@ -137,7 +137,7 @@ export default function HostControls({
 
           <div className="space-y-2">
             {/* Minimum Participants Check */}
-            <div className="flex items-center justify-between p-3 rounded-lg bg-[#091717]/40 border border-[#20808D]/20">
+            <div className="flex items-center justify-between p-3 rounded-lg bg-[#040404]/40 border border-[#02BD9B]/20">
               <div className="flex items-center space-x-2">
                 {debaters.length >= 2 ? (
                   <CheckCircle2 className="w-4 h-4 text-green-400" />
@@ -160,7 +160,7 @@ export default function HostControls({
             </div>
 
             {/* Participants Ready Check */}
-            <div className="flex items-center justify-between p-3 rounded-lg bg-[#091717]/40 border border-[#20808D]/20">
+            <div className="flex items-center justify-between p-3 rounded-lg bg-[#040404]/40 border border-[#02BD9B]/20">
               <div className="flex items-center space-x-2">
                 {readyDebaters.length === debaters.length &&
                 debaters.length > 0 ? (
@@ -212,15 +212,15 @@ export default function HostControls({
 
         {/* Room Statistics */}
         <div className="grid grid-cols-3 gap-3">
-          <div className="p-3 rounded-lg bg-[#091717]/40 border border-[#20808D]/20 text-center">
-            <Users className="w-4 h-4 text-[#20808D] mx-auto mb-1" />
+          <div className="p-3 rounded-lg bg-[#040404]/40 border border-[#02BD9B]/20 text-center">
+            <Users className="w-4 h-4 text-[#02BD9B] mx-auto mb-1" />
             <div className="text-sm font-semibold text-white">
               {totalParticipants}
             </div>
             <div className="text-xs text-white/60">Total</div>
           </div>
 
-          <div className="p-3 rounded-lg bg-[#091717]/40 border border-[#20808D]/20 text-center">
+          <div className="p-3 rounded-lg bg-[#040404]/40 border border-[#02BD9B]/20 text-center">
             <UserCheck className="w-4 h-4 mx-auto mb-1 text-green-400" />
             <div className="text-sm font-semibold text-white">
               {readyParticipants.length}
@@ -228,8 +228,8 @@ export default function HostControls({
             <div className="text-xs text-white/60">Ready</div>
           </div>
 
-          <div className="p-3 rounded-lg bg-[#091717]/40 border border-[#20808D]/20 text-center">
-            <Settings className="w-4 h-4 text-[#20808D] mx-auto mb-1" />
+          <div className="p-3 rounded-lg bg-[#040404]/40 border border-[#02BD9B]/20 text-center">
+            <Settings className="w-4 h-4 text-[#02BD9B] mx-auto mb-1" />
             <div className="text-sm font-semibold text-white">
               {debaters.length}
             </div>
@@ -238,11 +238,11 @@ export default function HostControls({
         </div>
 
         {/* Helpful Tips */}
-        <div className="p-3 rounded-lg bg-[#20808D]/10 border border-[#20808D]/20">
+        <div className="p-3 rounded-lg bg-[#02BD9B]/10 border border-[#02BD9B]/20">
           <div className="flex items-start space-x-2">
-            <Settings className="w-4 h-4 text-[#20808D] mt-0.5 flex-shrink-0" />
+            <Settings className="w-4 h-4 text-[#02BD9B] mt-0.5 flex-shrink-0" />
             <div className="space-y-1">
-              <p className="text-[#20808D] text-sm font-semibold">Host Tips:</p>
+              <p className="text-[#02BD9B] text-sm font-semibold">Host Tips:</p>
               <ul className="space-y-1 text-xs text-white/70">
                 <li>
                   • Ensure at least 2 participants have the

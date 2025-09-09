@@ -77,7 +77,7 @@ function VerifyEmailContent() {
   }, [searchParams]);
 
   return (
-    <div className="min-h-screen w-full bg-[#091717] flex items-center justify-center p-4 overflow-hidden relative">
+    <div className="min-h-screen w-full bg-[#040404] flex items-center justify-center p-4 overflow-hidden relative">
       {/* Background Effects */}
       <div className="absolute inset-0 overflow-hidden">
         <div className="absolute inset-0 opacity-20">
@@ -85,16 +85,16 @@ function VerifyEmailContent() {
             className="absolute inset-0"
             style={{
               background: `
-              radial-gradient(circle at 20% 80%, rgba(32, 128, 141, 0.1) 0%, transparent 50%),
-              radial-gradient(circle at 80% 20%, rgba(46, 86, 94, 0.1) 0%, transparent 50%),
-              radial-gradient(circle at 40% 40%, rgba(32, 128, 141, 0.05) 0%, transparent 50%)
+              radial-gradient(circle at 20% 80%, rgba(2, 189, 155, 0.1) 0%, transparent 50%),
+              radial-gradient(circle at 80% 20%, rgba(2, 189, 155, 0.08) 0%, transparent 50%),
+              radial-gradient(circle at 40% 40%, rgba(2, 189, 155, 0.05) 0%, transparent 50%)
             `,
             }}
           />
         </div>
 
         <motion.div
-          className="absolute top-1/4 left-1/4 w-64 h-64 bg-gradient-to-br from-[#20808D]/10 to-transparent rounded-full blur-3xl"
+          className="absolute top-1/4 left-1/4 w-64 h-64 bg-gradient-to-br from-[#02BD9B]/10 to-transparent rounded-full blur-3xl"
           animate={{
             rotate: 360,
             scale: [1, 1.2, 1],
@@ -105,7 +105,7 @@ function VerifyEmailContent() {
           }}
         />
         <motion.div
-          className="absolute bottom-1/4 right-1/4 w-48 h-48 bg-gradient-to-br from-[#2E565E]/10 to-transparent rounded-full blur-3xl"
+          className="absolute bottom-1/4 right-1/4 w-48 h-48 bg-gradient-to-br from-[#02BD9B]/8 to-transparent rounded-full blur-3xl"
           animate={{
             rotate: -360,
             scale: [1, 0.8, 1],
@@ -131,12 +131,12 @@ function VerifyEmailContent() {
             className="inline-flex items-center mb-6 space-x-3 group"
           >
             <div className="relative">
-              <div className="absolute inset-0 bg-gradient-to-br from-[#20808D] to-[#2E565E] rounded-2xl blur-lg opacity-50 group-hover:opacity-100 transition-opacity duration-300"></div>
-              <div className="relative w-12 h-12 bg-gradient-to-br from-[#20808D] to-[#2E565E] rounded-2xl flex items-center justify-center shadow-2xl border border-white/10">
+              <div className="absolute inset-0 bg-gradient-to-br from-[#02BD9B] to-[#02BD9B]/70 rounded-2xl blur-lg opacity-50 group-hover:opacity-100 transition-opacity duration-300"></div>
+              <div className="relative w-12 h-12 bg-gradient-to-br from-[#02BD9B] to-[#02BD9B]/80 rounded-2xl flex items-center justify-center shadow-2xl border border-[#02BD9B]/20">
                 <MessageSquare className="w-6 h-6 text-white" />
               </div>
             </div>
-            <span className="text-2xl font-bold bg-gradient-to-r from-white via-[#20808D] to-white bg-clip-text text-transparent">
+            <span className="text-2xl font-bold bg-gradient-to-r from-white via-[#02BD9B] to-white bg-clip-text text-transparent">
               Discourse
             </span>
           </Link>
@@ -151,15 +151,15 @@ function VerifyEmailContent() {
           <Card
             className="border-0 backdrop-blur-xl"
             style={{
-              background: `linear-gradient(135deg, rgba(19, 52, 59, 0.8), rgba(46, 86, 94, 0.6))`,
-              boxShadow: `0 25px 50px rgba(32, 128, 141, 0.2), 0 0 0 1px rgba(32, 128, 141, 0.1)`,
+              background: `linear-gradient(135deg, rgba(4, 4, 4, 0.9), rgba(2, 189, 155, 0.05))`,
+              boxShadow: `0 25px 50px rgba(2, 189, 155, 0.2), 0 0 0 1px rgba(2, 189, 155, 0.1)`,
             }}
           >
             <CardHeader className="text-center">
               <CardTitle className="flex items-center justify-center space-x-2 text-white">
                 {verificationStatus === "loading" && (
                   <>
-                    <Mail className="w-5 h-5 text-[#20808D]" />
+                    <Mail className="w-5 h-5 text-[#02BD9B]" />
                     <span>Verifying Email...</span>
                   </>
                 )}
@@ -180,7 +180,7 @@ function VerifyEmailContent() {
             <CardContent className="p-6 text-center">
               {verificationStatus === "loading" && (
                 <div className="text-white/80">
-                  <div className="w-8 h-8 border-2 border-[#20808D] border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+                  <div className="w-8 h-8 border-2 border-[#02BD9B] border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
                   <p>Please wait while we verify your email address...</p>
                 </div>
               )}
@@ -198,7 +198,7 @@ function VerifyEmailContent() {
                       Your email address has been successfully verified.
                     </p>
                     {userEmail && (
-                      <p className="text-sm text-[#20808D] mb-4">{userEmail}</p>
+                      <p className="text-sm text-[#02BD9B] mb-4">{userEmail}</p>
                     )}
                     <p className="mb-6 text-sm text-white/70">
                       You can now sign in to your account and start using
@@ -211,7 +211,7 @@ function VerifyEmailContent() {
                     whileTap={{ scale: 0.98 }}
                   >
                     <Link href="/login">
-                      <Button className="w-full bg-gradient-to-r from-[#20808D] to-[#2E565E] hover:from-[#20808D]/90 hover:to-[#2E565E]/90 text-white py-3 shadow-xl shadow-[#20808D]/30 border border-white/10 backdrop-blur-sm transition-all duration-300">
+                      <Button className="w-full bg-gradient-to-r from-[#02BD9B] to-[#02BD9B]/80 hover:from-[#02BD9B]/90 hover:to-[#02BD9B]/70 text-[#040404] font-semibold py-3 shadow-xl shadow-[#02BD9B]/30 border border-[#02BD9B]/20 backdrop-blur-sm transition-all duration-300">
                         Sign In Now
                         <ArrowRight className="w-5 h-5 ml-2" />
                       </Button>
@@ -244,7 +244,7 @@ function VerifyEmailContent() {
                     <Link href="/signup">
                       <Button
                         variant="outline"
-                        className="w-full border-[#20808D]/30 text-white hover:bg-[#20808D]/10 backdrop-blur-sm transition-all duration-300"
+                        className="w-full border-[#02BD9B]/30 text-white hover:bg-[#02BD9B]/10 backdrop-blur-sm transition-all duration-300"
                       >
                         Try Signing Up Again
                       </Button>
@@ -252,7 +252,7 @@ function VerifyEmailContent() {
                     <Link href="/login">
                       <Button
                         variant="ghost"
-                        className="w-full text-[#20808D] hover:text-[#20808D]/80 hover:bg-[#20808D]/10 transition-all duration-300"
+                        className="w-full text-[#02BD9B] hover:text-[#02BD9B]/80 hover:bg-[#02BD9B]/10 transition-all duration-300"
                       >
                         Already have an account? Sign In
                       </Button>
@@ -275,7 +275,7 @@ function VerifyEmailContent() {
             Need help?{" "}
             <Link
               href="/"
-              className="text-[#20808D] hover:text-[#20808D]/80 transition-colors"
+              className="text-[#02BD9B] hover:text-[#02BD9B]/80 transition-colors"
             >
               Contact Support
             </Link>
@@ -290,7 +290,7 @@ export default function VerifyEmailPage() {
   return (
     <Suspense
       fallback={
-        <div className="min-h-screen bg-[#091717] flex items-center justify-center">
+        <div className="min-h-screen bg-[#040404] flex items-center justify-center">
           <div className="text-white">Loading...</div>
         </div>
       }

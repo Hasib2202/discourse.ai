@@ -76,13 +76,13 @@ export default function RoomSettings({
   const getModeColor = (mode: string) => {
     switch (mode) {
       case "classic":
-        return "#20808D";
+        return "#02BD9B";
       case "corporate":
-        return "#2E565E";
+        return "#02BD9B";
       case "interactive":
-        return "#20808D";
+        return "#02BD9B";
       default:
-        return "#20808D";
+        return "#02BD9B";
     }
   };
 
@@ -146,11 +146,11 @@ export default function RoomSettings({
   const ModeIcon = getModeIcon(room.mode);
 
   return (
-    <Card className="border-0 bg-gradient-to-br from-[#13343B]/80 to-[#2E565E]/40 backdrop-blur-xl">
+    <Card className="border-0 bg-gradient-to-br from-[#040404]/80 to-[#02BD9B]/40 backdrop-blur-xl">
       <CardHeader className="pb-4">
         <div className="flex items-center justify-between">
           <CardTitle className="flex items-center space-x-2 text-lg text-white">
-            <Settings className="w-5 h-5 text-[#20808D]" />
+            <Settings className="w-5 h-5 text-[#02BD9B]" />
             <span>Room Settings</span>
           </CardTitle>
 
@@ -159,7 +159,7 @@ export default function RoomSettings({
               size="sm"
               variant="ghost"
               onClick={() => setIsEditing(true)}
-              className="text-[#20808D] hover:bg-[#20808D]/20 hover:text-[#20808D]"
+              className="text-[#02BD9B] hover:bg-[#02BD9B]/20 hover:text-[#02BD9B]"
             >
               <Edit3 className="w-4 h-4 mr-2" />
               Edit
@@ -172,7 +172,7 @@ export default function RoomSettings({
                 size="sm"
                 onClick={handleSave}
                 disabled={isSaving}
-                className="bg-[#20808D] hover:bg-[#20808D]/90 text-white"
+                className="bg-[#02BD9B] hover:bg-[#02BD9B]/90 text-[#040404] font-semibold"
               >
                 <Save className="w-4 h-4 mr-1" />
                 {isSaving ? "Saving..." : "Save"}
@@ -210,7 +210,7 @@ export default function RoomSettings({
             </Badge>
           </div>
 
-          <div className="p-3 rounded-lg bg-[#091717]/40 border border-[#20808D]/20">
+          <div className="p-3 rounded-lg bg-[#040404]/40 border border-[#02BD9B]/20">
             <p className="text-sm leading-relaxed text-white/70">
               {getModeDescription(room.mode)}
             </p>
@@ -220,7 +220,7 @@ export default function RoomSettings({
         {/* Topic Display */}
         <div className="space-y-3">
           <h4 className="text-sm font-semibold text-white/80">Debate Topic</h4>
-          <div className="p-4 rounded-lg bg-gradient-to-r from-[#20808D]/10 to-[#2E565E]/10 border border-[#20808D]/20">
+          <div className="p-4 rounded-lg bg-gradient-to-r from-[#02BD9B]/10 to-[#02BD9B]/10 border border-[#02BD9B]/20">
             <p className="leading-relaxed text-white">{room.topic}</p>
           </div>
         </div>
@@ -235,10 +235,10 @@ export default function RoomSettings({
             {/* Total Duration */}
             <motion.div
               whileHover={{ scale: isEditing ? 1 : 1.02 }}
-              className="flex items-center justify-between p-3 rounded-lg bg-[#091717]/40 border border-[#20808D]/20 hover:border-[#20808D]/40 transition-colors"
+              className="flex items-center justify-between p-3 rounded-lg bg-[#040404]/40 border border-[#02BD9B]/20 hover:border-[#02BD9B]/40 transition-colors"
             >
               <div className="flex items-center space-x-3">
-                <Clock className="w-4 h-4 text-[#20808D]" />
+                <Clock className="w-4 h-4 text-[#02BD9B]" />
                 <span className="text-sm font-medium text-white/90">
                   Total Duration
                 </span>
@@ -254,14 +254,14 @@ export default function RoomSettings({
                         debate_duration: parseInt(e.target.value) * 60 || 1800,
                       }))
                     }
-                    className="w-20 h-8 text-xs bg-[#091717]/60 border-[#20808D]/40 text-white"
+                    className="w-20 h-8 text-xs bg-[#040404]/60 border-[#02BD9B]/40 text-white"
                     min="5"
                     max="180"
                   />
                   <span className="text-xs text-white/60">min</span>
                 </div>
               ) : (
-                <Badge className="bg-[#20808D]/20 text-[#20808D] border-[#20808D]/40 font-semibold">
+                <Badge className="bg-[#02BD9B]/20 text-[#02BD9B] border-[#02BD9B]/40 font-semibold">
                   {formatDuration(room.debate_duration)}
                 </Badge>
               )}
@@ -270,10 +270,10 @@ export default function RoomSettings({
             {/* Turn Duration */}
             <motion.div
               whileHover={{ scale: isEditing ? 1 : 1.02 }}
-              className="flex items-center justify-between p-3 rounded-lg bg-[#091717]/40 border border-[#20808D]/20 hover:border-[#20808D]/40 transition-colors"
+              className="flex items-center justify-between p-3 rounded-lg bg-[#040404]/40 border border-[#02BD9B]/20 hover:border-[#02BD9B]/40 transition-colors"
             >
               <div className="flex items-center space-x-3">
-                <Timer className="w-4 h-4 text-[#20808D]" />
+                <Timer className="w-4 h-4 text-[#02BD9B]" />
                 <span className="text-sm font-medium text-white/90">
                   Turn Duration
                 </span>
@@ -289,14 +289,14 @@ export default function RoomSettings({
                         turn_duration: parseInt(e.target.value) * 60 || 120,
                       }))
                     }
-                    className="w-20 h-8 text-xs bg-[#091717]/60 border-[#20808D]/40 text-white"
+                    className="w-20 h-8 text-xs bg-[#040404]/60 border-[#02BD9B]/40 text-white"
                     min="1"
                     max="10"
                   />
                   <span className="text-xs text-white/60">min</span>
                 </div>
               ) : (
-                <Badge className="bg-[#20808D]/20 text-[#20808D] border-[#20808D]/40 font-semibold">
+                <Badge className="bg-[#02BD9B]/20 text-[#02BD9B] border-[#02BD9B]/40 font-semibold">
                   {formatDuration(room.turn_duration)}
                 </Badge>
               )}
@@ -305,10 +305,10 @@ export default function RoomSettings({
             {/* Rounds Count */}
             <motion.div
               whileHover={{ scale: isEditing ? 1 : 1.02 }}
-              className="flex items-center justify-between p-3 rounded-lg bg-[#091717]/40 border border-[#20808D]/20 hover:border-[#20808D]/40 transition-colors"
+              className="flex items-center justify-between p-3 rounded-lg bg-[#040404]/40 border border-[#02BD9B]/20 hover:border-[#02BD9B]/40 transition-colors"
             >
               <div className="flex items-center space-x-3">
-                <RotateCcw className="w-4 h-4 text-[#20808D]" />
+                <RotateCcw className="w-4 h-4 text-[#02BD9B]" />
                 <span className="text-sm font-medium text-white/90">
                   Rounds
                 </span>
@@ -323,12 +323,12 @@ export default function RoomSettings({
                       rounds_count: parseInt(e.target.value) || 3,
                     }))
                   }
-                  className="w-20 h-8 text-xs bg-[#091717]/60 border-[#20808D]/40 text-white"
+                  className="w-20 h-8 text-xs bg-[#040404]/60 border-[#02BD9B]/40 text-white"
                   min="1"
                   max="10"
                 />
               ) : (
-                <Badge className="bg-[#20808D]/20 text-[#20808D] border-[#20808D]/40 font-semibold">
+                <Badge className="bg-[#02BD9B]/20 text-[#02BD9B] border-[#02BD9B]/40 font-semibold">
                   {room.rounds_count}
                 </Badge>
               )}
@@ -343,7 +343,7 @@ export default function RoomSettings({
           </h4>
 
           <div className="space-y-2">
-            <div className="flex items-center justify-between p-2 rounded-lg bg-[#091717]/40">
+            <div className="flex items-center justify-between p-2 rounded-lg bg-[#040404]/40">
               <span className="text-sm text-white/70">Visibility</span>
               <Badge
                 className={`text-xs font-semibold ${
@@ -356,7 +356,7 @@ export default function RoomSettings({
               </Badge>
             </div>
 
-            <div className="flex items-center justify-between p-2 rounded-lg bg-[#091717]/40">
+            <div className="flex items-center justify-between p-2 rounded-lg bg-[#040404]/40">
               <span className="text-sm text-white/70">Max Participants</span>
               {isEditing ? (
                 <Input
@@ -368,18 +368,18 @@ export default function RoomSettings({
                       max_participants: parseInt(e.target.value) || 10,
                     }))
                   }
-                  className="w-20 h-8 text-xs bg-[#091717]/60 border-[#20808D]/40 text-white"
+                  className="w-20 h-8 text-xs bg-[#040404]/60 border-[#02BD9B]/40 text-white"
                   min="2"
                   max="50"
                 />
               ) : (
-                <Badge className="bg-[#20808D]/20 text-[#20808D] border-[#20808D]/40 text-xs font-semibold">
+                <Badge className="bg-[#02BD9B]/20 text-[#02BD9B] border-[#02BD9B]/40 text-xs font-semibold">
                   {room.max_participants}
                 </Badge>
               )}
             </div>
 
-            <div className="flex items-center justify-between p-2 rounded-lg bg-[#091717]/40">
+            <div className="flex items-center justify-between p-2 rounded-lg bg-[#040404]/40">
               <span className="text-sm text-white/70">Created</span>
               <span className="text-xs text-white/60">
                 {new Date(room.created_at).toLocaleDateString()}
@@ -404,10 +404,10 @@ export default function RoomSettings({
 
         {/* Host Notice */}
         {isHost && (
-          <div className="p-3 border rounded-lg bg-gradient-to-r from-[#20808D]/10 to-[#2E565E]/10 border-[#20808D]/20">
+          <div className="p-3 border rounded-lg bg-gradient-to-r from-[#02BD9B]/10 to-[#02BD9B]/10 border-[#02BD9B]/20">
             <div className="flex items-center space-x-2">
-              <Settings className="w-4 h-4 text-[#20808D]" />
-              <span className="text-sm font-semibold text-[#20808D]">
+              <Settings className="w-4 h-4 text-[#02BD9B]" />
+              <span className="text-sm font-semibold text-[#02BD9B]">
                 You can edit these settings while the room is in waiting status
               </span>
             </div>

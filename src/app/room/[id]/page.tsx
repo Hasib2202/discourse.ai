@@ -504,11 +504,11 @@ export default function RoomLobbyPage() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-[#091717] flex items-center justify-center">
+      <div className="min-h-screen bg-[#040404] flex items-center justify-center">
         <motion.div
           animate={{ rotate: 360 }}
           transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-          className="w-12 h-12 border-4 border-[#20808D] border-t-transparent rounded-full"
+          className="w-12 h-12 border-4 border-[#02BD9B] border-t-transparent rounded-full"
         />
       </div>
     );
@@ -516,7 +516,7 @@ export default function RoomLobbyPage() {
 
   if (!room || !user) {
     return (
-      <div className="min-h-screen bg-[#091717] flex items-center justify-center">
+      <div className="min-h-screen bg-[#040404] flex items-center justify-center">
         <div className="text-center">
           <h1 className="mb-4 text-2xl font-bold text-white">Room not found</h1>
           <p className="mb-6 text-white/70">
@@ -525,7 +525,7 @@ export default function RoomLobbyPage() {
           </p>
           <button
             onClick={() => router.push("/dashboard")}
-            className="bg-[#20808D] hover:bg-[#20808D]/90 text-white px-6 py-3 rounded-lg transition-colors"
+            className="bg-[#02BD9B] hover:bg-[#02BD9B]/90 text-white px-6 py-3 rounded-lg transition-colors"
           >
             Back to Dashboard
           </button>
@@ -535,13 +535,13 @@ export default function RoomLobbyPage() {
   }
 
   return (
-    <div className="min-h-screen w-full bg-[#091717] overflow-x-hidden relative">
+    <div className="min-h-screen w-full bg-[#040404] overflow-x-hidden relative">
       {/* Background Effects */}
       <div className="fixed inset-0 z-0 pointer-events-none">
         {Array.from({ length: 40 }).map((_, i) => (
           <motion.div
             key={i}
-            className="absolute w-1 h-1 bg-[#20808D]/15 rounded-full"
+            className="absolute w-1 h-1 bg-[#02BD9B]/15 rounded-full"
             style={{
               left: `${Math.random() * 100}%`,
               top: `${Math.random() * 100}%`,

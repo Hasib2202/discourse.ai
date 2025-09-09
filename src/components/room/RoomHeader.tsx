@@ -40,10 +40,10 @@ export default function RoomHeader({ room, isHost, onLeaveRoom }: RoomHeaderProp
 
   const getModeColor = (mode: string) => {
     switch (mode) {
-      case "classic": return "#20808D"
-      case "corporate": return "#2E565E"  
-      case "interactive": return "#20808D"
-      default: return "#20808D"
+      case "classic": return "#02BD9B"
+      case "corporate": return "#02BD9B"  
+      case "interactive": return "#02BD9B"
+      default: return "#02BD9B"
     }
   }
 
@@ -59,7 +59,7 @@ export default function RoomHeader({ room, isHost, onLeaveRoom }: RoomHeaderProp
   const ModeIcon = getModeIcon(room.mode)
 
   return (
-    <header className="relative z-10 border-b border-[#20808D]/30 bg-[#091717]/95 backdrop-blur-2xl shadow-xl shadow-[#20808D]/10">
+    <header className="relative z-10 border-b border-[#02BD9B]/30 bg-[#040404]/95 backdrop-blur-2xl shadow-xl shadow-[#02BD9B]/10">
       <div className="px-6 py-6 mx-auto max-w-7xl">
         <div className="flex items-center justify-between">
           {/* Left Side - Back Button & Room Info */}
@@ -72,7 +72,7 @@ export default function RoomHeader({ room, isHost, onLeaveRoom }: RoomHeaderProp
                 <Button
                   variant="outline"
                   size="sm"
-                  className="border-[#20808D]/50 text-white hover:bg-[#20808D]/20 backdrop-blur-sm"
+                  className="border-[#02BD9B]/50 text-white hover:bg-[#02BD9B]/20 backdrop-blur-sm"
                 >
                   <ArrowLeft className="w-4 h-4 mr-2" />
                   Dashboard
@@ -147,9 +147,9 @@ export default function RoomHeader({ room, isHost, onLeaveRoom }: RoomHeaderProp
               initial={{ opacity: 0, scale: 0.8 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ delay: 0.4 }}
-              className="flex items-center space-x-2 bg-[#20808D]/20 px-4 py-2 rounded-full border border-[#20808D]/30"
+              className="flex items-center space-x-2 bg-[#02BD9B]/20 px-4 py-2 rounded-full border border-[#02BD9B]/30"
             >
-              <Users className="w-4 h-4 text-[#20808D]" />
+              <Users className="w-4 h-4 text-[#02BD9B]" />
               <span className="font-semibold text-white">
                 {room.current_participants}/{room.max_participants}
               </span>
@@ -160,11 +160,11 @@ export default function RoomHeader({ room, isHost, onLeaveRoom }: RoomHeaderProp
               initial={{ opacity: 0, x: 20 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: 0.5 }}
-              className="flex items-center space-x-3 bg-[#091717]/60 px-4 py-2 rounded-lg border border-[#20808D]/30 backdrop-blur-sm"
+              className="flex items-center space-x-3 bg-[#040404]/60 px-4 py-2 rounded-lg border border-[#02BD9B]/30 backdrop-blur-sm"
             >
               <div className="text-center">
                 <div className="text-xs font-medium text-white/60">Room Code</div>
-                <code className="text-[#20808D] font-mono font-bold text-lg tracking-wider">
+                <code className="text-[#02BD9B] font-mono font-bold text-lg tracking-wider">
                   {room.room_code}
                 </code>
               </div>
@@ -172,7 +172,7 @@ export default function RoomHeader({ room, isHost, onLeaveRoom }: RoomHeaderProp
                 size="sm"
                 variant="ghost"
                 onClick={copyRoomCode}
-                className="h-8 w-8 p-0 hover:bg-[#20808D]/20 text-[#20808D]"
+                className="h-8 w-8 p-0 hover:bg-[#02BD9B]/20 text-[#02BD9B]"
               >
                 <Copy className="w-4 h-4" />
               </Button>
@@ -221,7 +221,7 @@ export default function RoomHeader({ room, isHost, onLeaveRoom }: RoomHeaderProp
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.8 }}
-          className="mt-4 p-4 bg-[#13343B]/60 rounded-xl border border-[#20808D]/20 backdrop-blur-sm"
+          className="mt-4 p-4 bg-[#040404]/60 rounded-xl border border-[#02BD9B]/20 backdrop-blur-sm"
         >
           <div className="mb-1 text-sm font-medium text-white/60">Debate Topic</div>
           <p className="text-lg leading-relaxed text-white">{room.topic}</p>
