@@ -16,6 +16,7 @@ interface ParticipantStatus {
     isStreaming: boolean;
     isRaised?: boolean;
     isSpeaking?: boolean;
+    isVideoOff?: boolean;
 }
 
 export const useSocket = ({ roomId, userId, userName }: UseSocketProps) => {
@@ -26,6 +27,7 @@ export const useSocket = ({ roomId, userId, userName }: UseSocketProps) => {
 
     useEffect(() => {
         // Get socket URL from environment variable or fallback to localhost
+        // Since we're using integrated server.js, connect to the same port as the web server
         const socketUrl = process.env.NEXT_PUBLIC_SOCKET_URL || 'http://localhost:3001';
 
         console.log('🔌 Connecting to Socket.IO server:', socketUrl);
@@ -40,10 +42,12 @@ export const useSocket = ({ roomId, userId, userName }: UseSocketProps) => {
 
         // Connection events
         socket.on('connect', () => {
-            console.log('✅ Connected to Socket.IO server');
+            console.log('✅ CLAUDE DEBUG: Connected to Socket.IO server');
+            console.log('✅ CLAUDE DEBUG: Socket ID:', socket.id);
             setIsConnected(true);
 
             // Join the room
+            console.log('🚪 CLAUDE DEBUG: Emitting join-room event:', { roomId, userId, userName });
             socket.emit('join-room', {
                 roomId,
                 userId,
@@ -77,8 +81,10 @@ export const useSocket = ({ roomId, userId, userName }: UseSocketProps) => {
 
         // Room events
         socket.on('room-participants', (participantList: string[]) => {
-            console.log('👥 Room participants updated:', participantList);
+            console.log('👥 CLAUDE DEBUG: Room participants updated:', participantList);
+            console.log('👥 CLAUDE DEBUG: Setting participants state...');
             setParticipants(participantList);
+            console.log('👥 CLAUDE DEBUG: Participants state should now be set');
         });
 
         socket.on('participant-joined', (data: { userId: string; userName: string }) => {
@@ -155,6 +161,19 @@ export const useSocket = ({ roomId, userId, userName }: UseSocketProps) => {
             });
         });
 
+        // Video status handler
+        socket.on('participant-video-status', (data: { userId: string; userName: string; isVideoOn: boolean }) => {
+            console.log('📹 Video status update:', data);
+            setParticipantStatus(prev => {
+                const newMap = new Map(prev);
+                const existing = newMap.get(data.userId) || { userId: data.userId, isMuted: false, isStreaming: false };
+
+                // Update the video status (note: isVideoOff is opposite of isVideoOn)
+                newMap.set(data.userId, { ...existing, isVideoOff: !data.isVideoOn });
+                return newMap;
+            });
+        });
+
         // Chat message handler
         socket.on('chat-message', (data: { userId: string; userName: string; message: string; timestamp: string }) => {
             console.log('💬 Chat message received:', data);
@@ -164,6 +183,7 @@ export const useSocket = ({ roomId, userId, userName }: UseSocketProps) => {
         // Cleanup function
         return () => {
             if (socketRef.current) {
+                socketRef.current.off('participant-video-status');
                 socketRef.current.disconnect();
             }
         };
@@ -227,6 +247,8 @@ export const useSocket = ({ roomId, userId, userName }: UseSocketProps) => {
         }
     }, [userId]);
 
+    console.log('🔄 CLAUDE DEBUG: useSocket returning participants:', participants);
+    
     return {
         isConnected,
         participants,

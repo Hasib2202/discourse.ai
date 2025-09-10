@@ -64,7 +64,7 @@ io.on('connection', (socket) => {
         console.log(`📊 Room ${roomId} now has ${roomUsers.size} participants`);
 
         // Send updated participant list to all room members
-        io.to(roomId).emit('participants-updated', Array.from(roomUsers));
+        io.to(roomId).emit('room-participants', Array.from(roomUsers));
 
         // Send participant status to all room members
         io.to(roomId).emit('participant-status', {
@@ -145,6 +145,98 @@ io.on('connection', (socket) => {
         });
     });
 
+    // ===== WebRTC Video Call Signaling Events =====
+    
+    // Handle video call start
+    socket.on('video-call-start', ({ roomId, userId, userName }) => {
+        console.log(`🎥 ${userName} started video call in room ${roomId}`);
+        
+        // Notify all other participants in the room that this user joined the video call
+        socket.to(roomId).emit('video-call-user-joined', {
+            userId,
+            userName
+        });
+    });
+
+    // Handle video call stop  
+    socket.on('video-call-stop', ({ roomId, userId }) => {
+        console.log(`🛑 ${socket.userName} stopped video call in room ${roomId}`);
+        
+        // Notify all other participants in the room that this user left the video call
+        socket.to(roomId).emit('video-call-user-left', {
+            userId
+        });
+    });
+
+    // Handle WebRTC offer
+    socket.on('webrtc-offer', ({ roomId, toUserId, offer }) => {
+        console.log(`📞 Relaying WebRTC offer from ${socket.userId} to ${toUserId} in room ${roomId}`);
+        
+        // Forward the offer to the specific user
+        const targetSocket = Array.from(io.sockets.sockets.values())
+            .find(s => s.userId === toUserId && s.roomId === roomId);
+            
+        if (targetSocket) {
+            targetSocket.emit('webrtc-offer', {
+                offer,
+                fromUserId: socket.userId
+            });
+            console.log(`✅ Successfully relayed offer to ${toUserId}`);
+        } else {
+            console.warn(`⚠️ Could not find target socket for user ${toUserId}`);
+        }
+    });
+
+    // Handle WebRTC answer
+    socket.on('webrtc-answer', ({ roomId, toUserId, answer }) => {
+        console.log(`📞 Relaying WebRTC answer from ${socket.userId} to ${toUserId} in room ${roomId}`);
+        
+        // Forward the answer to the specific user
+        const targetSocket = Array.from(io.sockets.sockets.values())
+            .find(s => s.userId === toUserId && s.roomId === roomId);
+            
+        if (targetSocket) {
+            targetSocket.emit('webrtc-answer', {
+                answer,
+                fromUserId: socket.userId
+            });
+            console.log(`✅ Successfully relayed answer to ${toUserId}`);
+        } else {
+            console.warn(`⚠️ Could not find target socket for user ${toUserId}`);
+        }
+    });
+
+    // Handle WebRTC ICE candidates
+    socket.on('webrtc-ice-candidate', ({ roomId, toUserId, candidate }) => {
+        console.log(`🧊 Relaying ICE candidate from ${socket.userId} to ${toUserId} in room ${roomId}`);
+        
+        // Forward the ICE candidate to the specific user  
+        const targetSocket = Array.from(io.sockets.sockets.values())
+            .find(s => s.userId === toUserId && s.roomId === roomId);
+            
+        if (targetSocket) {
+            targetSocket.emit('webrtc-ice-candidate', {
+                candidate,
+                fromUserId: socket.userId
+            });
+            console.log(`✅ Successfully relayed ICE candidate to ${toUserId}`);
+        } else {
+            console.warn(`⚠️ Could not find target socket for user ${toUserId}`);
+        }
+    });
+
+    // Handle participant video toggle (optional - for UI updates)
+    socket.on('participant-video-toggle', ({ roomId, userId, isVideoOn }) => {
+        console.log(`📹 ${socket.userName} ${isVideoOn ? 'turned on' : 'turned off'} video in room ${roomId}`);
+        
+        // Broadcast video status to other participants  
+        socket.to(roomId).emit('participant-video-status', {
+            userId,
+            userName: socket.userName,
+            isVideoOn
+        });
+    });
+
     // Handle disconnect
     socket.on('disconnect', () => {
         console.log('❌ Client disconnected:', socket.id);
@@ -164,7 +256,7 @@ io.on('connection', (socket) => {
                     console.log(`🗑️ Removed empty room ${socket.roomId}`);
                 } else {
                     // Send updated participant list to remaining members
-                    io.to(socket.roomId).emit('participants-updated', Array.from(roomUsers));
+                    io.to(socket.roomId).emit('room-participants', Array.from(roomUsers));
                 }
             }
 

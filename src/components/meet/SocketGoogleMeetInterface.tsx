@@ -67,10 +67,14 @@ export default function SocketGoogleMeetInterface({
   const [isMuted, setIsMuted] = useState(false);
   const [isVideoOn, setIsVideoOn] = useState(false);
   const [isStreaming, setIsStreaming] = useState(false);
-  
+
   // WebRTC Video Call State
-  const [localVideoStream, setLocalVideoStream] = useState<MediaStream | null>(null);
-  const [remoteStreams, setRemoteStreams] = useState<Map<string, MediaStream>>(new Map());
+  const [localVideoStream, setLocalVideoStream] = useState<MediaStream | null>(
+    null
+  );
+  const [remoteStreams, setRemoteStreams] = useState<Map<string, MediaStream>>(
+    new Map()
+  );
   const [isVideoCallActive, setIsVideoCallActive] = useState(false);
   const [videoCallError, setVideoCallError] = useState<string | null>(null);
   const [audioLevel, setAudioLevel] = useState(0);
@@ -174,11 +178,13 @@ export default function SocketGoogleMeetInterface({
   const audioContextRef = useRef<AudioContext | null>(null);
   const mediaStreamRef = useRef<MediaStream | null>(null);
   const processorRef = useRef<ScriptProcessorNode | null>(null);
-  
+
   // WebRTC refs
   const localVideoRef = useRef<HTMLVideoElement>(null);
   const peerConnections = useRef<Map<string, RTCPeerConnection>>(new Map());
-  const pendingCandidates = useRef<Map<string, RTCIceCandidateInit[]>>(new Map());
+  const pendingCandidates = useRef<Map<string, RTCIceCandidateInit[]>>(
+    new Map()
+  );
 
   // Real-time participants state (combines database + socket participants)
   const [realTimeParticipants, setRealTimeParticipants] =
@@ -240,7 +246,7 @@ export default function SocketGoogleMeetInterface({
     // Show all database participants, mark online status based on socket presence
     const activeParticipants = updatedParticipants.map((p) => ({
       ...p,
-      is_online: socketParticipants.includes(p.user_id)
+      is_online: socketParticipants.includes(p.user_id),
     }));
 
     console.log("✅ Final active participants:", activeParticipants.length);
@@ -735,11 +741,14 @@ export default function SocketGoogleMeetInterface({
   useEffect(() => {
     console.log(
       "🎤 Checking auto-start conditions:",
-      "participants =", realTimeParticipants.length,
-      "isStreaming =", isStreaming,
-      "socketParticipants =", socketParticipants.length
+      "participants =",
+      realTimeParticipants.length,
+      "isStreaming =",
+      isStreaming,
+      "socketParticipants =",
+      socketParticipants.length
     );
-    
+
     if (realTimeParticipants.length >= 2 && !isStreaming) {
       console.log(
         "🎤 Auto-starting audio streaming with",
@@ -748,7 +757,12 @@ export default function SocketGoogleMeetInterface({
       );
       startAudioStreaming();
     }
-  }, [realTimeParticipants.length, isStreaming, startAudioStreaming, socketParticipants.length]);
+  }, [
+    realTimeParticipants.length,
+    isStreaming,
+    startAudioStreaming,
+    socketParticipants.length,
+  ]);
 
   // Toggle mute
   const toggleMute = async () => {
@@ -891,184 +905,338 @@ export default function SocketGoogleMeetInterface({
   }, [showChat]);
 
   // ===== WebRTC Video Call Functions =====
-  
+
   // WebRTC configuration
   const rtcConfig = {
     iceServers: [
-      { urls: 'stun:stun.l.google.com:19302' },
-      { urls: 'stun:stun1.l.google.com:19302' }
-    ]
+      { urls: "stun:stun.l.google.com:19302" },
+      { urls: "stun:stun1.l.google.com:19302" },
+    ],
   };
 
   // Start video call
   const startVideoCall = useCallback(async () => {
     try {
-      console.log('🎥 Starting video call...');
-      setVideoCallError(null);
-      
-      // Get user media (video + audio)
-      const stream = await navigator.mediaDevices.getUserMedia({
-        video: {
-          width: { ideal: 1280 },
-          height: { ideal: 720 },
-          frameRate: { ideal: 30 }
-        },
-        audio: {
-          echoCancellation: true,
-          noiseSuppression: true,
-          autoGainControl: true
-        }
+      console.log("🎥 Starting video call...", {
+        userId: currentUser.id,
+        userName: userDisplayName,
+        socketParticipants: socketParticipants.length,
+        participants: socketParticipants,
+        isStreaming,
+        hasExistingAudio: !!mediaStreamRef.current,
       });
+      setVideoCallError(null);
 
-      setLocalVideoStream(stream);
+      let videoStream: MediaStream;
+
+      // If audio streaming is already active, add video to existing stream
+      if (isStreaming && mediaStreamRef.current) {
+        console.log("🎤 Audio already streaming, adding video track...");
+        
+        // Get only video track
+        const videoOnlyStream = await navigator.mediaDevices.getUserMedia({
+          video: {
+            width: { ideal: 1280 },
+            height: { ideal: 720 },
+            frameRate: { ideal: 30 },
+          },
+          audio: false, // Don't get new audio, use existing
+        });
+
+        // Combine existing audio with new video
+        const audioTracks = mediaStreamRef.current.getAudioTracks();
+        const videoTracks = videoOnlyStream.getVideoTracks();
+        
+        videoStream = new MediaStream([...audioTracks, ...videoTracks]);
+      } else {
+        console.log("🎤 No existing audio, getting video + audio...");
+        
+        // Get both video and audio
+        videoStream = await navigator.mediaDevices.getUserMedia({
+          video: {
+            width: { ideal: 1280 },
+            height: { ideal: 720 },
+            frameRate: { ideal: 30 },
+          },
+          audio: {
+            echoCancellation: true,
+            noiseSuppression: true,
+            autoGainControl: true,
+          },
+        });
+
+        // Set as audio stream for existing audio functionality
+        if (mediaStreamRef.current) {
+          mediaStreamRef.current.getTracks().forEach((track) => track.stop());
+        }
+        mediaStreamRef.current = videoStream;
+        setIsStreaming(true);
+      }
+
+      setLocalVideoStream(videoStream);
       setIsVideoCallActive(true);
       setIsVideoOn(true);
-      
-      // Also set this as the audio stream for existing audio functionality
-      if (mediaStreamRef.current) {
-        mediaStreamRef.current.getTracks().forEach(track => track.stop());
-      }
-      mediaStreamRef.current = stream;
-      setIsStreaming(true);
-      
+
       // Video element will be set via useEffect after render
 
       // Notify other participants about video call
       if (socketRef.current) {
-        console.log('📡 Emitting video-call-start event');
-        socketRef.current.emit('video-call-start', {
+        console.log("📡 Emitting video-call-start event");
+        socketRef.current.emit("video-call-start", {
           roomId,
           userId: currentUser.id,
-          userName: userDisplayName
+          userName: userDisplayName,
         });
       }
 
-      console.log('✅ Video call started successfully');
-      console.log('📹 Local video element:', localVideoRef.current);
-      console.log('📹 Local video stream tracks:', stream.getTracks().map(t => `${t.kind}: ${t.enabled}`));
-      toast.success('Video call started!');
-      
+      // IMPORTANT: Create peer connections for all existing participants in the room
+      // This ensures that when we start video call, we connect to participants already present
+      console.log(
+        "🔗 CLAUDE FIX: Creating peer connections for existing participants..."
+      );
+      console.log(
+        "👥 CLAUDE FIX: Current socket participants:",
+        socketParticipants
+      );
+
+      // Additional debugging - emit this to server so we can see it in server logs
+      if (socketRef.current) {
+        socketRef.current.emit("debug-log", {
+          message: `🔗 CLAUDE DEBUG: ${userDisplayName} about to create peer connections`,
+          participants: socketParticipants,
+          participantCount: socketParticipants.length,
+        });
+      }
+
+      for (const participantId of socketParticipants) {
+        if (participantId !== currentUser.id) {
+          console.log(
+            `🤝 Creating peer connection for existing participant: ${participantId}`
+          );
+
+          // Emit to server for debugging
+          if (socketRef.current) {
+            socketRef.current.emit("debug-log", {
+              message: `🤝 ${userDisplayName} creating peer connection for ${participantId}`,
+              fromUser: currentUser.id,
+              toUser: participantId,
+            });
+          }
+
+          const pc = createPeerConnection(participantId);
+
+          if (pc) {
+            console.log(`✅ Peer connection created for ${participantId}`);
+
+            // Add our local stream to the peer connection
+            videoStream.getTracks().forEach((track) => {
+              console.log(
+                `📤 Adding ${track.kind} track to peer connection for ${participantId}`
+              );
+              pc.addTrack(track, videoStream);
+            });
+
+            // Create and send offer to all existing participants (we're starting the video call)
+            try {
+              console.log(`📞 Creating and sending offer to ${participantId}`);
+              const offer = await pc.createOffer();
+              await pc.setLocalDescription(offer);
+
+              socketRef.current?.emit("webrtc-offer", {
+                roomId,
+                toUserId: participantId,
+                offer: offer,
+              });
+
+              console.log(`✅ Offer sent to ${participantId}`);
+            } catch (error) {
+              console.error(
+                `❌ Error creating offer for ${participantId}:`,
+                error
+              );
+            }
+          } else {
+            console.error(
+              `❌ Failed to create peer connection for ${participantId}`
+            );
+          }
+        }
+      }
+
+      console.log("✅ Video call started successfully");
+      console.log("📹 Local video element:", localVideoRef.current);
+      console.log(
+        "📹 Local video stream tracks:",
+        videoStream.getTracks().map((t) => `${t.kind}: ${t.enabled}`)
+      );
+      toast.success("Video call started!");
     } catch (error) {
-      console.error('❌ Failed to start video call:', error);
-      let errorMessage = 'Failed to start video call: ';
-      
+      console.error("❌ Failed to start video call:", error);
+      let errorMessage = "Failed to start video call: ";
+
       if (error instanceof DOMException) {
-        if (error.name === 'NotAllowedError') {
-          errorMessage += 'Please allow camera and microphone access';
-        } else if (error.name === 'NotFoundError') {
-          errorMessage += 'Camera or microphone not found';
-        } else if (error.name === 'AbortError') {
-          errorMessage += 'Starting video input failed. Try refreshing the page.';
+        if (error.name === "NotAllowedError") {
+          errorMessage += "Please allow camera and microphone access";
+        } else if (error.name === "NotFoundError") {
+          errorMessage += "Camera or microphone not found";
+        } else if (error.name === "AbortError") {
+          errorMessage +=
+            "Starting video input failed. Try refreshing the page.";
         } else {
-          errorMessage += error.message || 'Unknown error';
+          errorMessage += error.message || "Unknown error";
         }
       } else {
-        errorMessage += 'Unknown error occurred';
+        errorMessage += "Unknown error occurred";
       }
-      
+
       setVideoCallError(errorMessage);
       toast.error(errorMessage);
     }
-  }, [roomId, currentUser.id, userDisplayName, socketRef]);
+  }, [roomId, currentUser.id, userDisplayName, socketRef, socketParticipants]);
 
   // Stop video call
   const stopVideoCall = useCallback(() => {
-    console.log('🛑 Stopping video call...');
-    
-    // Stop local video stream
+    console.log("🛑 Stopping video call...");
+
+    // Stop only video tracks, keep audio tracks for continued audio streaming
     if (localVideoStream) {
-      localVideoStream.getTracks().forEach(track => track.stop());
+      const videoTracks = localVideoStream.getVideoTracks();
+      console.log(`🛑 Stopping ${videoTracks.length} video tracks`);
+      videoTracks.forEach((track) => track.stop());
+      
+      // Keep audio tracks in mediaStreamRef for continued audio streaming
+      const audioTracks = localVideoStream.getAudioTracks();
+      if (audioTracks.length > 0 && isStreaming) {
+        console.log("🎤 Keeping audio tracks for continued audio streaming");
+        mediaStreamRef.current = new MediaStream(audioTracks);
+      } else {
+        console.log("🎤 No audio tracks to keep, stopping all streaming");
+        if (mediaStreamRef.current) {
+          mediaStreamRef.current.getTracks().forEach((track) => track.stop());
+          mediaStreamRef.current = null;
+        }
+        setIsStreaming(false);
+      }
+      
       setLocalVideoStream(null);
     }
-    
+
     // Close all peer connections
-    peerConnections.current.forEach(pc => pc.close());
+    peerConnections.current.forEach((pc) => pc.close());
     peerConnections.current.clear();
-    
+
     // Clear remote streams
     setRemoteStreams(new Map());
-    
+
     setIsVideoCallActive(false);
     setIsVideoOn(false);
-    
+
     // Notify other participants
     if (socketRef.current) {
-      socketRef.current.emit('video-call-stop', {
+      socketRef.current.emit("video-call-stop", {
         roomId,
-        userId: currentUser.id
+        userId: currentUser.id,
       });
     }
-    
-    toast.info('Video call stopped');
-  }, [localVideoStream, roomId, currentUser.id, socketRef]);
+
+    toast.info("Video stopped - Audio continues");
+  }, [localVideoStream, roomId, currentUser.id, socketRef, isStreaming]);
 
   // Create peer connection
-  const createPeerConnection = useCallback((remoteUserId: string) => {
-    console.log(`🤝 Creating peer connection for ${remoteUserId}`);
-    
-    // Close existing peer connection if it exists
-    const existingPc = peerConnections.current.get(remoteUserId);
-    if (existingPc) {
-      console.log(`🔄 Closing existing peer connection for ${remoteUserId}`);
-      existingPc.close();
-      peerConnections.current.delete(remoteUserId);
-      pendingCandidates.current.delete(remoteUserId);
-    }
-    
-    const pc = new RTCPeerConnection(rtcConfig);
-    peerConnections.current.set(remoteUserId, pc);
-    
-    // Add local stream
-    if (localVideoStream) {
-      localVideoStream.getTracks().forEach(track => {
-        pc.addTrack(track, localVideoStream);
-      });
-    }
-    
-    // Handle remote stream
-    pc.ontrack = (event) => {
-      console.log(`📺 Received remote stream from ${remoteUserId}`);
-      const [remoteStream] = event.streams;
-      setRemoteStreams(prev => new Map(prev.set(remoteUserId, remoteStream)));
-    };
-    
-    // Handle ICE candidates
-    pc.onicecandidate = (event) => {
-      if (event.candidate && socketRef.current) {
-        console.log(`🧊 Sending ICE candidate to ${remoteUserId}`);
-        socketRef.current.emit('webrtc-ice-candidate', {
-          roomId,
-          toUserId: remoteUserId,
-          candidate: event.candidate
+  const createPeerConnection = useCallback(
+    (remoteUserId: string) => {
+      console.log(`🤝 Creating peer connection for ${remoteUserId}`);
+
+      // Close existing peer connection if it exists
+      const existingPc = peerConnections.current.get(remoteUserId);
+      if (existingPc) {
+        console.log(`🔄 Closing existing peer connection for ${remoteUserId}`);
+        existingPc.close();
+        peerConnections.current.delete(remoteUserId);
+        pendingCandidates.current.delete(remoteUserId);
+      }
+
+      const pc = new RTCPeerConnection(rtcConfig);
+      peerConnections.current.set(remoteUserId, pc);
+
+      // Add local stream
+      if (localVideoStream) {
+        localVideoStream.getTracks().forEach((track) => {
+          pc.addTrack(track, localVideoStream);
         });
       }
-    };
-    
-    // Handle connection state changes
-    pc.onconnectionstatechange = () => {
-      console.log(`Connection state with ${remoteUserId}: ${pc.connectionState}`);
-    };
-    
-    return pc;
-  }, [localVideoStream, roomId, socketRef]);
+
+      // Handle remote stream
+      pc.ontrack = (event) => {
+        console.log(`📺 Received remote stream from ${remoteUserId}`, {
+          streams: event.streams.length,
+          tracks:
+            event.streams[0]
+              ?.getTracks()
+              .map((t) => `${t.kind}: ${t.enabled}`) || [],
+          streamActive: event.streams[0]?.active,
+        });
+        const [remoteStream] = event.streams;
+        if (remoteStream) {
+          setRemoteStreams((prev) => {
+            const newMap = new Map(prev.set(remoteUserId, remoteStream));
+            console.log(
+              `🗂️ Remote streams updated:`,
+              Array.from(newMap.keys())
+            );
+            return newMap;
+          });
+        } else {
+          console.warn(`⚠️ No remote stream received from ${remoteUserId}`);
+        }
+      };
+
+      // Handle ICE candidates
+      pc.onicecandidate = (event) => {
+        if (event.candidate && socketRef.current) {
+          console.log(`🧊 Sending ICE candidate to ${remoteUserId}`);
+          socketRef.current.emit("webrtc-ice-candidate", {
+            roomId,
+            toUserId: remoteUserId,
+            candidate: event.candidate,
+          });
+        }
+      };
+
+      // Handle connection state changes
+      pc.onconnectionstatechange = () => {
+        console.log(
+          `Connection state with ${remoteUserId}: ${pc.connectionState}`
+        );
+      };
+
+      return pc;
+    },
+    [localVideoStream, roomId, socketRef]
+  );
 
   // Set local video stream when element is available
   useEffect(() => {
     if (localVideoRef.current && localVideoStream) {
-      console.log('📺 Setting local video stream to element');
+      console.log("📺 Setting local video stream to element");
       localVideoRef.current.srcObject = localVideoStream;
-      
+
       // Add event listeners for debugging
       localVideoRef.current.onloadedmetadata = () => {
-        console.log('✅ Local video metadata loaded');
-        localVideoRef.current?.play().catch(e => console.error('❌ Video play error:', e));
+        console.log("✅ Local video metadata loaded");
+        localVideoRef.current
+          ?.play()
+          .catch((e) => console.error("❌ Video play error:", e));
       };
-      
+
       localVideoRef.current.onerror = (e) => {
-        console.error('❌ Local video error:', e);
+        console.error("❌ Local video error:", e);
       };
-      
-      console.log('📺 Local video srcObject set, stream active:', localVideoStream.active);
+
+      console.log(
+        "📺 Local video srcObject set, stream active:",
+        localVideoStream.active
+      );
     }
   }, [localVideoStream]);
 
@@ -1077,159 +1245,216 @@ export default function SocketGoogleMeetInterface({
     if (!socketRef.current) return;
 
     const socket = socketRef.current;
+    console.log("🔧 Setting up WebRTC event handlers for socket:", socket.id);
 
     // Handle user joining video call
-    socket.on('video-call-user-joined', async (data: { userId: string; userName: string }) => {
-      console.log(`📺 Received video-call-user-joined event:`, data);
-      console.log(`🔍 Current user: ${currentUser.id}, Event user: ${data.userId}`);
-      
-      if (data.userId !== currentUser.id) {
-        console.log(`👋 ${data.userName} joined video call, creating peer connection`);
-        
-        const pc = createPeerConnection(data.userId);
-        
-        if (pc) {
-          try {
-            // Only the peer with the lexicographically smaller ID creates the offer
-            // This prevents both peers from creating offers simultaneously
-            const shouldCreateOffer = currentUser.id.localeCompare(data.userId) < 0;
-            
-            console.log(`🤔 Should create offer? ${shouldCreateOffer} (${currentUser.id}.localeCompare(${data.userId}) = ${currentUser.id.localeCompare(data.userId)})`);
-            
-            if (shouldCreateOffer) {
-              console.log(`📞 Creating offer for ${data.userId}`);
-              const offer = await pc.createOffer({
-                offerToReceiveAudio: true,
-                offerToReceiveVideo: true
-              });
-              await pc.setLocalDescription(offer);
-              
-              console.log(`📡 Sending offer to ${data.userId}`);
-              socket.emit('webrtc-offer', {
-                roomId,
-                toUserId: data.userId,
-                offer
-              });
+    socket.on(
+      "video-call-user-joined",
+      async (data: { userId: string; userName: string }) => {
+        try {
+          console.log(`📺 Received video-call-user-joined event:`, data);
+          console.log(
+            `🔍 Current user: ${currentUser.id}, Event user: ${data.userId}`
+          );
+          console.log(
+            `🎥 Local video call active: ${isVideoCallActive}, Local stream: ${!!localVideoStream}`
+          );
+
+          if (data.userId !== currentUser.id) {
+            console.log(
+              `👋 ${data.userName} joined video call, creating peer connection`
+            );
+
+            const pc = createPeerConnection(data.userId);
+
+            if (pc) {
+              console.log(
+                `✅ Peer connection created successfully for ${data.userId}`
+              );
+              try {
+                // Always create offers when someone joins - both sides can create offers
+                console.log(
+                  `📞 Creating offer for ${data.userId} who joined the video call`
+                );
+                const offer = await pc.createOffer({
+                  offerToReceiveAudio: true,
+                  offerToReceiveVideo: true,
+                });
+                console.log(
+                  `🔧 Offer created:`,
+                  offer.type,
+                  offer.sdp?.substring(0, 100) + "..."
+                );
+                await pc.setLocalDescription(offer);
+                console.log(
+                  `🔧 Local description set, signaling state:`,
+                  pc.signalingState
+                );
+
+                console.log(`📡 Sending offer to ${data.userId}`);
+                socket.emit("webrtc-offer", {
+                  roomId,
+                  toUserId: data.userId,
+                  offer,
+                });
+                console.log(`📡 Offer sent to server`);
+              } catch (error) {
+                console.error("❌ Error creating offer:", error);
+              }
             } else {
-              console.log(`👂 Waiting to receive offer from ${data.userId} (they will initiate)`);
+              console.error(
+                `❌ Failed to create peer connection for ${data.userId}`
+              );
             }
-          } catch (error) {
-            console.error('❌ Error creating offer:', error);
+          } else {
+            console.log(`⏭️ Skipping own user: ${data.userId}`);
           }
+        } catch (error) {
+          console.error(
+            "❌ CRITICAL ERROR in video-call-user-joined handler:",
+            error
+          );
         }
-      } else {
-        console.log(`⏭️ Skipping own user: ${data.userId}`);
       }
-    });
+    );
 
     // Handle WebRTC offer
-    socket.on('webrtc-offer', async (data: { offer: RTCSessionDescriptionInit; fromUserId: string }) => {
-      console.log(`📞 Received offer from ${data.fromUserId}`);
-      
-      try {
-        const pc = createPeerConnection(data.fromUserId);
-        if (!pc) {
-          console.error('❌ Failed to create peer connection for offer');
-          return;
+    socket.on(
+      "webrtc-offer",
+      async (data: {
+        offer: RTCSessionDescriptionInit;
+        fromUserId: string;
+      }) => {
+        console.log(`📞 Received offer from ${data.fromUserId}`);
+
+        try {
+          const pc = createPeerConnection(data.fromUserId);
+          if (!pc) {
+            console.error("❌ Failed to create peer connection for offer");
+            return;
+          }
+
+          console.log(`📥 Setting remote description for ${data.fromUserId}`);
+          await pc.setRemoteDescription(data.offer);
+
+          // Add pending ICE candidates
+          const pending = pendingCandidates.current.get(data.fromUserId) || [];
+          console.log(`🧊 Adding ${pending.length} pending ICE candidates`);
+          for (const candidate of pending) {
+            await pc.addIceCandidate(candidate);
+          }
+          pendingCandidates.current.delete(data.fromUserId);
+
+          // Create answer
+          console.log(`📞 Creating answer for ${data.fromUserId}`);
+          const answer = await pc.createAnswer();
+          await pc.setLocalDescription(answer);
+
+          console.log(`📡 Sending answer to ${data.fromUserId}`);
+          socket.emit("webrtc-answer", {
+            roomId,
+            toUserId: data.fromUserId,
+            answer,
+          });
+        } catch (error) {
+          console.error("❌ Error handling offer:", error);
         }
-        
-        console.log(`📥 Setting remote description for ${data.fromUserId}`);
-        await pc.setRemoteDescription(data.offer);
-        
-        // Add pending ICE candidates
-        const pending = pendingCandidates.current.get(data.fromUserId) || [];
-        console.log(`🧊 Adding ${pending.length} pending ICE candidates`);
-        for (const candidate of pending) {
-          await pc.addIceCandidate(candidate);
-        }
-        pendingCandidates.current.delete(data.fromUserId);
-        
-        // Create answer
-        console.log(`📞 Creating answer for ${data.fromUserId}`);
-        const answer = await pc.createAnswer();
-        await pc.setLocalDescription(answer);
-        
-        console.log(`📡 Sending answer to ${data.fromUserId}`);
-        socket.emit('webrtc-answer', {
-          roomId,
-          toUserId: data.fromUserId,
-          answer
-        });
-      } catch (error) {
-        console.error('❌ Error handling offer:', error);
       }
-    });
+    );
 
     // Handle WebRTC answer
-    socket.on('webrtc-answer', async (data: { answer: RTCSessionDescriptionInit; fromUserId: string }) => {
-      console.log(`📞 Received answer from ${data.fromUserId}`);
-      
-      try {
-        const pc = peerConnections.current.get(data.fromUserId);
-        if (pc) {
-          console.log(`🔄 Peer connection state: ${pc.signalingState}`);
-          
-          // Only set remote description if we're in the correct state (have-local-offer)
-          if (pc.signalingState === 'have-local-offer') {
-            console.log(`✅ Setting remote answer for ${data.fromUserId}`);
-            await pc.setRemoteDescription(data.answer);
-            
-            // Add pending ICE candidates
-            const pending = pendingCandidates.current.get(data.fromUserId) || [];
-            console.log(`🧊 Adding ${pending.length} pending ICE candidates`);
-            for (const candidate of pending) {
-              await pc.addIceCandidate(candidate);
+    socket.on(
+      "webrtc-answer",
+      async (data: {
+        answer: RTCSessionDescriptionInit;
+        fromUserId: string;
+      }) => {
+        console.log(`📞 Received answer from ${data.fromUserId}`);
+
+        try {
+          const pc = peerConnections.current.get(data.fromUserId);
+          if (pc) {
+            console.log(`🔄 Peer connection state: ${pc.signalingState}`);
+
+            // Only set remote description if we're in the correct state (have-local-offer)
+            if (pc.signalingState === "have-local-offer") {
+              console.log(`✅ Setting remote answer for ${data.fromUserId}`);
+              await pc.setRemoteDescription(data.answer);
+
+              // Add pending ICE candidates
+              const pending =
+                pendingCandidates.current.get(data.fromUserId) || [];
+              console.log(`🧊 Adding ${pending.length} pending ICE candidates`);
+              for (const candidate of pending) {
+                await pc.addIceCandidate(candidate);
+              }
+              pendingCandidates.current.delete(data.fromUserId);
+            } else {
+              console.warn(
+                `⚠️ Cannot set remote answer, peer connection in state: ${pc.signalingState}`
+              );
             }
-            pendingCandidates.current.delete(data.fromUserId);
-          } else {
-            console.warn(`⚠️ Cannot set remote answer, peer connection in state: ${pc.signalingState}`);
           }
+        } catch (error) {
+          console.error("❌ Error handling WebRTC answer:", error);
         }
-      } catch (error) {
-        console.error('❌ Error handling WebRTC answer:', error);
       }
-    });
+    );
 
     // Handle ICE candidates
-    socket.on('webrtc-ice-candidate', async (data: { candidate: RTCIceCandidateInit; fromUserId: string }) => {
-      console.log(`🧊 Received ICE candidate from ${data.fromUserId}`);
-      
-      try {
-        const pc = peerConnections.current.get(data.fromUserId);
-        if (pc) {
-          console.log(`🔄 PC state: ${pc.signalingState}, remoteDesc: ${!!pc.remoteDescription}`);
-          
-          // Only add ICE candidates if we have a remote description and connection is stable
-          if (pc.remoteDescription && (pc.signalingState === 'stable' || pc.signalingState === 'have-remote-offer')) {
-            console.log(`✅ Adding ICE candidate for ${data.fromUserId}`);
-            await pc.addIceCandidate(data.candidate);
+    socket.on(
+      "webrtc-ice-candidate",
+      async (data: { candidate: RTCIceCandidateInit; fromUserId: string }) => {
+        console.log(`🧊 Received ICE candidate from ${data.fromUserId}`);
+
+        try {
+          const pc = peerConnections.current.get(data.fromUserId);
+          if (pc) {
+            console.log(
+              `🔄 PC state: ${
+                pc.signalingState
+              }, remoteDesc: ${!!pc.remoteDescription}`
+            );
+
+            // Only add ICE candidates if we have a remote description and connection is stable
+            if (
+              pc.remoteDescription &&
+              (pc.signalingState === "stable" ||
+                pc.signalingState === "have-remote-offer")
+            ) {
+              console.log(`✅ Adding ICE candidate for ${data.fromUserId}`);
+              await pc.addIceCandidate(data.candidate);
+            } else {
+              console.log(
+                `⏳ Storing ICE candidate for later (state: ${pc.signalingState})`
+              );
+              // Store candidates for later
+              const pending =
+                pendingCandidates.current.get(data.fromUserId) || [];
+              pending.push(data.candidate);
+              pendingCandidates.current.set(data.fromUserId, pending);
+            }
           } else {
-            console.log(`⏳ Storing ICE candidate for later (state: ${pc.signalingState})`);
-            // Store candidates for later
-            const pending = pendingCandidates.current.get(data.fromUserId) || [];
-            pending.push(data.candidate);
-            pendingCandidates.current.set(data.fromUserId, pending);
+            console.warn(`⚠️ No peer connection found for ${data.fromUserId}`);
           }
-        } else {
-          console.warn(`⚠️ No peer connection found for ${data.fromUserId}`);
+        } catch (error) {
+          console.error("❌ Error handling ICE candidate:", error);
+          // Don't let ICE candidate errors break the connection
         }
-      } catch (error) {
-        console.error('❌ Error handling ICE candidate:', error);
-        // Don't let ICE candidate errors break the connection
       }
-    });
+    );
 
     // Handle user leaving video call
-    socket.on('video-call-user-left', (data: { userId: string }) => {
+    socket.on("video-call-user-left", (data: { userId: string }) => {
       console.log(`👋 ${data.userId} left video call`);
-      
+
       const pc = peerConnections.current.get(data.userId);
       if (pc) {
         pc.close();
         peerConnections.current.delete(data.userId);
       }
-      
-      setRemoteStreams(prev => {
+
+      setRemoteStreams((prev) => {
         const newMap = new Map(prev);
         newMap.delete(data.userId);
         return newMap;
@@ -1237,13 +1462,20 @@ export default function SocketGoogleMeetInterface({
     });
 
     return () => {
-      socket.off('video-call-user-joined');
-      socket.off('webrtc-offer');
-      socket.off('webrtc-answer');
-      socket.off('webrtc-ice-candidate');
-      socket.off('video-call-user-left');
+      socket.off("video-call-user-joined");
+      socket.off("webrtc-offer");
+      socket.off("webrtc-answer");
+      socket.off("webrtc-ice-candidate");
+      socket.off("video-call-user-left");
     };
-  }, [socketRef, currentUser.id, roomId, createPeerConnection]);
+  }, [
+    socketRef,
+    currentUser.id,
+    roomId,
+    createPeerConnection,
+    isVideoCallActive,
+    localVideoStream,
+  ]);
 
   // Enhanced video toggle that works with WebRTC
   const toggleVideo = useCallback(() => {
@@ -1253,17 +1485,17 @@ export default function SocketGoogleMeetInterface({
         const newVideoState = !videoTrack.enabled;
         videoTrack.enabled = newVideoState;
         setIsVideoOn(newVideoState);
-        
+
         // Notify other participants via socket
         if (socketRef.current) {
-          socketRef.current.emit('participant-video-toggle', {
+          socketRef.current.emit("participant-video-toggle", {
             roomId,
             userId: currentUser.id,
-            isVideoOn: newVideoState
+            isVideoOn: newVideoState,
           });
         }
-        
-        toast.info(newVideoState ? 'Camera turned on' : 'Camera turned off');
+
+        toast.info(newVideoState ? "Camera turned on" : "Camera turned off");
       }
     }
   }, [localVideoStream, roomId, currentUser.id, socketRef]);
@@ -1272,9 +1504,9 @@ export default function SocketGoogleMeetInterface({
   useEffect(() => {
     return () => {
       if (localVideoStream) {
-        localVideoStream.getTracks().forEach(track => track.stop());
+        localVideoStream.getTracks().forEach((track) => track.stop());
       }
-      peerConnections.current.forEach(pc => pc.close());
+      peerConnections.current.forEach((pc) => pc.close());
     };
   }, [localVideoStream]);
 
@@ -1363,21 +1595,21 @@ export default function SocketGoogleMeetInterface({
               <Users className="w-4 h-4 mr-2" />
               {realTimeParticipants.length}
             </Button>
-            <Button
+            {/* <Button
               variant="ghost"
               size="sm"
               onClick={() => setShowSettings(!showSettings)}
               className="text-white/70 hover:text-white hover:bg-[#20808D]/20"
             >
               <Settings className="w-4 h-4" />
-            </Button>
-            <Button
+            </Button> */}
+            {/* <Button
               variant="ghost"
               size="sm"
               className="text-white/70 hover:text-white hover:bg-[#20808D]/20"
             >
               <MessageSquare className="w-4 h-4" />
-            </Button>
+            </Button> */}
           </div>
         </div>
       </motion.header>
@@ -1490,19 +1722,21 @@ export default function SocketGoogleMeetInterface({
                         {realTimeParticipants.length} participant
                         {realTimeParticipants.length !== 1 ? "s" : ""} joined
                       </Badge>
-                      
+
                       {socketParticipants.length > 0 && (
                         <Badge
                           variant="outline"
-                          className="bg-green-500/20 text-green-400 border-green-500/40 ml-2"
+                          className="ml-2 text-green-400 bg-green-500/20 border-green-500/40"
                         >
                           {socketParticipants.length} online
                         </Badge>
                       )}
-                      
+
                       {/* Debug info */}
                       <div className="text-xs text-white/50">
-                        DB: {participants.length} | Socket: {socketParticipants.length} | Total: {realTimeParticipants.length}
+                        DB: {participants.length} | Socket:{" "}
+                        {socketParticipants.length} | Total:{" "}
+                        {realTimeParticipants.length}
                       </div>
                     </div>
                   </div>
@@ -1533,20 +1767,10 @@ export default function SocketGoogleMeetInterface({
                         Prepare Audio
                       </Button>
 
-                      {/* Start Video Call Button */}
-                      <Button
-                        onClick={startVideoCall}
-                        variant="outline"
-                        className="w-full border-[#20808D]/40 text-[#20808D] hover:bg-[#20808D]/10"
-                        disabled={videoCallError !== null}
-                      >
-                        <Video className="w-4 h-4 mr-2" />
-                        Start Video Call
-                      </Button>
-                      
+
                       {/* Show video call error if any */}
                       {videoCallError && (
-                        <div className="text-sm text-red-400 bg-red-500/10 p-3 rounded-lg border border-red-500/20">
+                        <div className="p-3 text-sm text-red-400 border rounded-lg bg-red-500/10 border-red-500/20">
                           {videoCallError}
                         </div>
                       )}
@@ -1584,6 +1808,24 @@ export default function SocketGoogleMeetInterface({
                       <CardContent className="relative p-0 aspect-video">
                         {/* Video/Avatar Container */}
                         <div className="absolute inset-0 bg-gradient-to-br from-[#20808D]/20 to-[#2E565E]/20 flex items-center justify-center">
+                          {/* Debug logging for video stream conditions */}
+                          {(() => {
+                            console.log(
+                              `🔍 Video conditions for ${participant.profiles.full_name}:`,
+                              {
+                                isCurrentUser,
+                                hasLocalStream: !!localVideoStream,
+                                isVideoOn,
+                                hasRemoteStream: remoteStreams.has(
+                                  participant.user_id
+                                ),
+                                isVideoOff: status?.isVideoOff,
+                                userId: participant.user_id,
+                              }
+                            );
+                            return null;
+                          })()}
+
                           {/* Video Stream or Avatar */}
                           {isCurrentUser && localVideoStream && isVideoOn ? (
                             <video
@@ -1592,32 +1834,62 @@ export default function SocketGoogleMeetInterface({
                               playsInline
                               muted
                               className="absolute inset-0 w-full h-full object-cover scale-x-[-1]"
-                              onLoadedMetadata={() => console.log('🎥 Local video element loaded metadata')}
-                              onError={(e) => console.error('❌ Local video element error:', e)}
+                              onLoadedMetadata={() =>
+                                console.log(
+                                  "🎥 Local video element loaded metadata"
+                                )
+                              }
+                              onError={(e) =>
+                                console.error(
+                                  "❌ Local video element error:",
+                                  e
+                                )
+                              }
                             />
-                          ) : remoteStreams.has(participant.user_id) && !status?.isVideoOff ? (
+                          ) : remoteStreams.has(participant.user_id) &&
+                            !status?.isVideoOff ? (
                             <video
                               autoPlay
                               playsInline
                               ref={(video) => {
-                                if (video && remoteStreams.has(participant.user_id)) {
-                                  const stream = remoteStreams.get(participant.user_id)!;
+                                if (
+                                  video &&
+                                  remoteStreams.has(participant.user_id)
+                                ) {
+                                  const stream = remoteStreams.get(
+                                    participant.user_id
+                                  )!;
                                   video.srcObject = stream;
-                                  
+
                                   // Add debugging for remote video
                                   video.onloadedmetadata = () => {
-                                    console.log(`✅ Remote video loaded for ${participant.user_id}`);
-                                    video.play().catch(e => console.error('❌ Remote video play error:', e));
+                                    console.log(
+                                      `✅ Remote video loaded for ${participant.user_id}`
+                                    );
+                                    video
+                                      .play()
+                                      .catch((e) =>
+                                        console.error(
+                                          "❌ Remote video play error:",
+                                          e
+                                        )
+                                      );
                                   };
-                                  
+
                                   video.onerror = (e) => {
-                                    console.error(`❌ Remote video error for ${participant.user_id}:`, e);
+                                    console.error(
+                                      `❌ Remote video error for ${participant.user_id}:`,
+                                      e
+                                    );
                                   };
-                                  
-                                  console.log(`📺 Set remote video srcObject for ${participant.user_id}, stream active:`, stream.active);
+
+                                  console.log(
+                                    `📺 Set remote video srcObject for ${participant.user_id}, stream active:`,
+                                    stream.active
+                                  );
                                 }
                               }}
-                              className="absolute inset-0 w-full h-full object-cover"
+                              className="absolute inset-0 object-cover w-full h-full"
                             />
                           ) : (
                             <Avatar className="w-16 h-16">
@@ -1915,27 +2187,43 @@ export default function SocketGoogleMeetInterface({
               </motion.div>
             )}
 
-            {/* Video Button */}
+            {/* Camera Toggle Button (only when video call is active) */}
+            {/* {isVideoCallActive && (
+              <Button
+                onClick={toggleVideo}
+                size="lg"
+                className={`w-14 h-14 rounded-full border-2 transition-all duration-300 ${
+                  !isVideoOn
+                    ? "bg-red-500 hover:bg-red-600 border-red-400 text-white"
+                    : "bg-[#20808D] hover:bg-[#20808D]/90 border-[#20808D] text-white"
+                }`}
+                title={isVideoOn ? "Turn off camera" : "Turn on camera"}
+              >
+                {isVideoOn ? (
+                  <Video className="w-6 h-6" />
+                ) : (
+                  <VideoOff className="w-6 h-6" />
+                )}
+              </Button>
+            )} */}
+
+            {/* Single Video Call Toggle Button */}
             <Button
-              onClick={() => {
-                if (isVideoCallActive) {
-                  toggleVideo();
-                } else {
-                  startVideoCall();
-                }
-              }}
+              onClick={isVideoCallActive ? stopVideoCall : startVideoCall}
               size="lg"
               className={`w-14 h-14 rounded-full border-2 transition-all duration-300 ${
-                !isVideoOn
+                isVideoCallActive
                   ? "bg-red-500 hover:bg-red-600 border-red-400 text-white"
-                  : "bg-[#20808D] hover:bg-[#20808D]/90 border-[#20808D] text-white"
+                  : "bg-green-500 hover:bg-green-600 border-green-400 text-white"
               }`}
-              title={isVideoCallActive ? (isVideoOn ? "Turn off camera" : "Turn on camera") : "Start video call"}
+              title={
+                isVideoCallActive ? "Turn Off Video Call" : "Start Video Call"
+              }
             >
-              {isVideoOn ? (
-                <Video className="w-6 h-6" />
-              ) : (
+              {isVideoCallActive ? (
                 <VideoOff className="w-6 h-6" />
+              ) : (
+                <Video className="w-6 h-6" />
               )}
             </Button>
 
@@ -1953,7 +2241,7 @@ export default function SocketGoogleMeetInterface({
             </Button>
 
             {/* Test Speaking Button (for debugging) */}
-            <Button
+            {/* <Button
               onClick={() => {
                 console.log("🧪 Testing speaking indicator...");
                 const newSpeakingState = !isSpeaking;
@@ -1979,10 +2267,10 @@ export default function SocketGoogleMeetInterface({
               title="Test Speaking Indicator"
             >
               <Radio className="w-6 h-6" />
-            </Button>
+            </Button> */}
 
             {/* Audio Level Debug Button */}
-            <Button
+            {/* <Button
               onClick={() => {
                 console.log("🔍 Current audio state:");
                 console.log("- Audio Level:", audioLevel);
@@ -2019,7 +2307,7 @@ export default function SocketGoogleMeetInterface({
               title="Debug Audio & Participant State"
             >
               🔍
-            </Button>
+            </Button> */}
 
             {/* Chat Button */}
             <Button
@@ -2039,18 +2327,6 @@ export default function SocketGoogleMeetInterface({
                 </span>
               )}
             </Button>
-
-            {/* Stop Video Call Button (only show when video call is active) */}
-            {isVideoCallActive && (
-              <Button
-                onClick={stopVideoCall}
-                size="lg"
-                className="w-14 h-14 rounded-full border-2 bg-orange-500 hover:bg-orange-600 border-orange-400 text-white transition-all duration-300"
-                title="Stop Video Call"
-              >
-                <VideoOff className="w-6 h-6" />
-              </Button>
-            )}
 
             {/* Screen Share Button */}
             <Button
@@ -2095,13 +2371,15 @@ export default function SocketGoogleMeetInterface({
                   </span>
                 </div>
               )}
-              
+
               {/* Video Call Status */}
               {isVideoCallActive && (
                 <div className="flex items-center justify-center space-x-2">
                   <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse" />
-                  <span className="text-sm text-green-400 font-medium">
-                    Video call active • {remoteStreams.size + (localVideoStream ? 1 : 0)} participants
+                  <span className="text-sm font-medium text-green-400">
+                    Video call active •{" "}
+                    {remoteStreams.size + (localVideoStream ? 1 : 0)}{" "}
+                    participants
                   </span>
                 </div>
               )}
