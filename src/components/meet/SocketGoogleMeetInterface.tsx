@@ -57,6 +57,13 @@ interface SocketGoogleMeetInterfaceProps {
   onLeaveRoom: () => void;
 }
 
+// Extend window object for pending audio elements
+declare global {
+  interface Window {
+    pendingAudioElements?: HTMLAudioElement[];
+  }
+}
+
 export default function SocketGoogleMeetInterface({
   roomId,
   currentUser,
@@ -79,7 +86,7 @@ export default function SocketGoogleMeetInterface({
   const [videoCallError, setVideoCallError] = useState<string | null>(null);
   const [audioLevel, setAudioLevel] = useState(0);
   const [showParticipants, setShowParticipants] = useState(false);
-  const [showSettings, setShowSettings] = useState(false);
+  // const [showSettings, setShowSettings] = useState(false);
   const [handRaised, setHandRaised] = useState(false);
   const [showTroubleshooting, setShowTroubleshooting] = useState(false);
   const [] = useState(false);
@@ -185,6 +192,15 @@ export default function SocketGoogleMeetInterface({
   const pendingCandidates = useRef<Map<string, RTCIceCandidateInit[]>>(
     new Map()
   );
+
+  // Audio-only WebRTC refs (separate from video)
+  const audioPeerConnections = useRef<Map<string, RTCPeerConnection>>(
+    new Map()
+  );
+  const audioPendingCandidates = useRef<Map<string, RTCIceCandidateInit[]>>(
+    new Map()
+  );
+  const remoteAudioStreams = useRef<Map<string, MediaStream>>(new Map());
 
   // Real-time participants state (combines database + socket participants)
   const [realTimeParticipants, setRealTimeParticipants] =
@@ -696,6 +712,101 @@ export default function SocketGoogleMeetInterface({
     }
   }, [initializeMicrophone]);
 
+  // Create audio-only peer connection for voice communication
+  const createAudioPeerConnection = useCallback(
+    (remoteUserId: string) => {
+      console.log(`🎤 Creating audio peer connection for ${remoteUserId}`);
+
+      // Close existing audio peer connection if it exists
+      const existingPc = audioPeerConnections.current.get(remoteUserId);
+      if (existingPc) {
+        console.log(
+          `🔄 Closing existing audio peer connection for ${remoteUserId}`
+        );
+        existingPc.close();
+        audioPeerConnections.current.delete(remoteUserId);
+        audioPendingCandidates.current.delete(remoteUserId);
+      }
+
+      const pc = new RTCPeerConnection(rtcConfig);
+      audioPeerConnections.current.set(remoteUserId, pc);
+
+      // Add local audio stream if available
+      if (mediaStreamRef.current) {
+        const audioTracks = mediaStreamRef.current.getAudioTracks();
+        audioTracks.forEach((track) => {
+          console.log(
+            `📤 Adding audio track to peer connection for ${remoteUserId}`
+          );
+          pc.addTrack(track, mediaStreamRef.current!);
+        });
+      }
+
+      // Handle remote audio stream
+      pc.ontrack = (event) => {
+        console.log(`🔊 Received remote audio stream from ${remoteUserId}`, {
+          streams: event.streams.length,
+          tracks: event.streams[0]?.getTracks().length || 0,
+        });
+
+        if (event.streams[0]) {
+          const remoteStream = event.streams[0];
+          remoteAudioStreams.current.set(remoteUserId, remoteStream);
+
+          // Create audio element to play remote audio
+          const audioElement = new Audio();
+          audioElement.srcObject = remoteStream;
+          audioElement.autoplay = true;
+          audioElement.muted = false;
+
+          // Try to play with user gesture fallback
+          const playAudio = async () => {
+            try {
+              await audioElement.play();
+              console.log(`✅ Playing remote audio from ${remoteUserId}`);
+            } catch (e) {
+              console.warn(
+                `⚠️ Auto-play blocked for ${remoteUserId}, will try on next user interaction:`,
+                e
+              );
+              // Store reference for later manual play trigger
+              if (!window.pendingAudioElements) {
+                window.pendingAudioElements = [];
+              }
+              window.pendingAudioElements.push(audioElement);
+            }
+          };
+
+          playAudio();
+
+          console.log(`✅ Remote audio stream set up for ${remoteUserId}`);
+        }
+      };
+
+      // Handle ICE candidates for audio connection
+      pc.onicecandidate = (event) => {
+        if (event.candidate && socketRef.current) {
+          console.log(`🧊 Sending audio ICE candidate to ${remoteUserId}`);
+          socketRef.current.emit("audio-webrtc-ice-candidate", {
+            roomId,
+            toUserId: remoteUserId,
+            candidate: event.candidate,
+          });
+        }
+      };
+
+      // Handle connection state changes
+      pc.onconnectionstatechange = () => {
+        console.log(
+          `Audio connection state with ${remoteUserId}: ${pc.connectionState}`
+        );
+      };
+
+      return pc;
+    },
+    [roomId, socketRef]
+  );
+
   // Start audio streaming
   const startAudioStreaming = useCallback(async () => {
     try {
@@ -721,10 +832,48 @@ export default function SocketGoogleMeetInterface({
         await initializeMicrophone();
       }
 
+      // Step 3: Create audio peer connections with other participants for voice communication
+      console.log("🔗 Establishing audio connections with participants...");
+      const otherParticipants = socketParticipants.filter(
+        (id) => id !== currentUser.id
+      );
+
+      for (const participantId of otherParticipants) {
+        console.log(`🎤 Creating audio connection with ${participantId}`);
+        const pc = createAudioPeerConnection(participantId);
+
+        if (pc) {
+          try {
+            // Create offer for audio connection
+            console.log(`📞 Creating audio offer for ${participantId}`);
+            const offer = await pc.createOffer({
+              offerToReceiveAudio: true,
+              offerToReceiveVideo: false, // Audio only
+            });
+
+            await pc.setLocalDescription(offer);
+
+            // Send offer via Socket.IO
+            if (socketRef.current) {
+              socketRef.current.emit("audio-webrtc-offer", {
+                roomId,
+                toUserId: participantId,
+                offer,
+              });
+            }
+          } catch (error) {
+            console.error(
+              `❌ Failed to create audio offer for ${participantId}:`,
+              error
+            );
+          }
+        }
+      }
+
       setIsStreaming(true);
       updateAudioStatus(isMuted, true);
-      console.log("🎙️ Audio streaming started");
-      toast.success("Audio streaming activated");
+      console.log("🎙️ Audio streaming started with peer connections");
+      toast.success("Voice communication enabled");
     } catch (error) {
       console.error("❌ Failed to start audio streaming:", error);
       toast.error("Failed to access microphone. Please check permissions.");
@@ -735,6 +884,11 @@ export default function SocketGoogleMeetInterface({
     initializeMobileAudio,
     isMuted,
     updateAudioStatus,
+    socketParticipants,
+    currentUser.id,
+    createAudioPeerConnection,
+    roomId,
+    socketRef,
   ]);
 
   // Auto-start audio streaming when minimum people present
@@ -764,6 +918,7 @@ export default function SocketGoogleMeetInterface({
     socketParticipants.length,
   ]);
 
+
   // Toggle mute
   const toggleMute = async () => {
     if (!isStreaming) {
@@ -774,14 +929,16 @@ export default function SocketGoogleMeetInterface({
     const newMutedState = !isMuted;
     setIsMuted(newMutedState);
 
-    // Control the actual audio track
+    // Control the actual audio track in mediaStreamRef
     if (mediaStreamRef.current) {
       const audioTracks = mediaStreamRef.current.getAudioTracks();
       if (audioTracks.length > 0) {
         audioTracks[0].enabled = !newMutedState;
-        console.log(`🎤 Audio track ${newMutedState ? "muted" : "unmuted"}`);
+        console.log(`🎤 mediaStreamRef audio track ${newMutedState ? "muted" : "unmuted"}`);
       }
     }
+
+    // Video stream is separate - no audio tracks to manage in localVideoStream
 
     updateAudioStatus(newMutedState, isStreaming);
     toast.info(newMutedState ? "Microphone muted" : "Microphone unmuted");
@@ -927,51 +1084,19 @@ export default function SocketGoogleMeetInterface({
       });
       setVideoCallError(null);
 
-      let videoStream: MediaStream;
+      console.log("🎥 Getting video-only stream...");
 
-      // If audio streaming is already active, add video to existing stream
-      if (isStreaming && mediaStreamRef.current) {
-        console.log("🎤 Audio already streaming, adding video track...");
-        
-        // Get only video track
-        const videoOnlyStream = await navigator.mediaDevices.getUserMedia({
-          video: {
-            width: { ideal: 1280 },
-            height: { ideal: 720 },
-            frameRate: { ideal: 30 },
-          },
-          audio: false, // Don't get new audio, use existing
-        });
+      // Always get only video stream - no audio
+      const videoStream = await navigator.mediaDevices.getUserMedia({
+        video: {
+          width: { ideal: 1280 },
+          height: { ideal: 720 },
+          frameRate: { ideal: 30 },
+        },
+        audio: false, // Never get audio for video calls
+      });
 
-        // Combine existing audio with new video
-        const audioTracks = mediaStreamRef.current.getAudioTracks();
-        const videoTracks = videoOnlyStream.getVideoTracks();
-        
-        videoStream = new MediaStream([...audioTracks, ...videoTracks]);
-      } else {
-        console.log("🎤 No existing audio, getting video + audio...");
-        
-        // Get both video and audio
-        videoStream = await navigator.mediaDevices.getUserMedia({
-          video: {
-            width: { ideal: 1280 },
-            height: { ideal: 720 },
-            frameRate: { ideal: 30 },
-          },
-          audio: {
-            echoCancellation: true,
-            noiseSuppression: true,
-            autoGainControl: true,
-          },
-        });
-
-        // Set as audio stream for existing audio functionality
-        if (mediaStreamRef.current) {
-          mediaStreamRef.current.getTracks().forEach((track) => track.stop());
-        }
-        mediaStreamRef.current = videoStream;
-        setIsStreaming(true);
-      }
+      console.log("📹 Video-only stream obtained successfully");
 
       setLocalVideoStream(videoStream);
       setIsVideoCallActive(true);
@@ -1028,7 +1153,7 @@ export default function SocketGoogleMeetInterface({
           if (pc) {
             console.log(`✅ Peer connection created for ${participantId}`);
 
-            // Add our local stream to the peer connection
+            // Add only video tracks to peer connection (no audio)
             videoStream.getTracks().forEach((track) => {
               console.log(
                 `📤 Adding ${track.kind} track to peer connection for ${participantId}`
@@ -1098,26 +1223,13 @@ export default function SocketGoogleMeetInterface({
   const stopVideoCall = useCallback(() => {
     console.log("🛑 Stopping video call...");
 
-    // Stop only video tracks, keep audio tracks for continued audio streaming
+    // Stop video tracks (video-only, no audio tracks to handle)
     if (localVideoStream) {
-      const videoTracks = localVideoStream.getVideoTracks();
-      console.log(`🛑 Stopping ${videoTracks.length} video tracks`);
-      videoTracks.forEach((track) => track.stop());
-      
-      // Keep audio tracks in mediaStreamRef for continued audio streaming
-      const audioTracks = localVideoStream.getAudioTracks();
-      if (audioTracks.length > 0 && isStreaming) {
-        console.log("🎤 Keeping audio tracks for continued audio streaming");
-        mediaStreamRef.current = new MediaStream(audioTracks);
-      } else {
-        console.log("🎤 No audio tracks to keep, stopping all streaming");
-        if (mediaStreamRef.current) {
-          mediaStreamRef.current.getTracks().forEach((track) => track.stop());
-          mediaStreamRef.current = null;
-        }
-        setIsStreaming(false);
-      }
-      
+      localVideoStream.getTracks().forEach((track) => {
+        console.log(`🛑 Stopping ${track.kind} track`);
+        track.stop();
+      });
+
       setLocalVideoStream(null);
     }
 
@@ -1139,8 +1251,8 @@ export default function SocketGoogleMeetInterface({
       });
     }
 
-    toast.info("Video stopped - Audio continues");
-  }, [localVideoStream, roomId, currentUser.id, socketRef, isStreaming]);
+    toast.info("Video call stopped - Audio streaming continues independently");
+  }, [localVideoStream, roomId, currentUser.id, socketRef]);
 
   // Create peer connection
   const createPeerConnection = useCallback(
@@ -1159,9 +1271,10 @@ export default function SocketGoogleMeetInterface({
       const pc = new RTCPeerConnection(rtcConfig);
       peerConnections.current.set(remoteUserId, pc);
 
-      // Add local stream
+      // Add local video stream (video-only, no audio)
       if (localVideoStream) {
         localVideoStream.getTracks().forEach((track) => {
+          console.log(`📤 Adding ${track.kind} track to peer connection for ${remoteUserId}`);
           pc.addTrack(track, localVideoStream);
         });
       }
@@ -1214,6 +1327,53 @@ export default function SocketGoogleMeetInterface({
     },
     [localVideoStream, roomId, socketRef]
   );
+
+  // Stop audio streaming and close audio peer connections
+  const stopAudioStreaming = useCallback(() => {
+    console.log("🔇 Stopping audio streaming...");
+
+    // Close all audio peer connections
+    audioPeerConnections.current.forEach((pc, userId) => {
+      console.log(`🔌 Closing audio connection with ${userId}`);
+      pc.close();
+    });
+    audioPeerConnections.current.clear();
+    audioPendingCandidates.current.clear();
+    remoteAudioStreams.current.clear();
+
+    // Stop local audio stream
+    if (mediaStreamRef.current) {
+      const audioTracks = mediaStreamRef.current.getAudioTracks();
+      audioTracks.forEach((track) => {
+        console.log("🛑 Stopping audio track");
+        track.stop();
+      });
+    }
+
+    setIsStreaming(false);
+    updateAudioStatus(false, false);
+    console.log("🔇 Audio streaming stopped");
+    toast.info("Voice communication stopped");
+  }, [updateAudioStatus]);
+
+  // Try to play any pending audio elements on user interaction
+  const tryPlayPendingAudio = useCallback(() => {
+    if (window.pendingAudioElements && window.pendingAudioElements.length > 0) {
+      console.log(
+        `🎵 Attempting to play ${window.pendingAudioElements.length} pending audio elements`
+      );
+      window.pendingAudioElements.forEach(async (audioElement, index) => {
+        try {
+          await audioElement.play();
+          console.log(`✅ Successfully played pending audio element ${index}`);
+        } catch (e) {
+          console.warn(`⚠️ Still cannot play audio element ${index}:`, e);
+        }
+      });
+      // Clear the pending array
+      window.pendingAudioElements = [];
+    }
+  }, []);
 
   // Set local video stream when element is available
   useEffect(() => {
@@ -1477,6 +1637,161 @@ export default function SocketGoogleMeetInterface({
     localVideoStream,
   ]);
 
+  // Handle Audio WebRTC signaling via Socket.IO (separate from video)
+  useEffect(() => {
+    if (!socketRef.current) return;
+
+    const socket = socketRef.current;
+
+    // Handle audio WebRTC offer
+    socket.on(
+      "audio-webrtc-offer",
+      async (data: {
+        offer: RTCSessionDescriptionInit;
+        fromUserId: string;
+      }) => {
+        console.log(`🎤 Received audio offer from ${data.fromUserId}`);
+
+        try {
+          const pc = createAudioPeerConnection(data.fromUserId);
+          if (!pc) {
+            console.error(
+              "❌ Failed to create audio peer connection for offer"
+            );
+            return;
+          }
+
+          console.log(
+            `📥 Setting remote description for audio from ${data.fromUserId}`
+          );
+          await pc.setRemoteDescription(data.offer);
+
+          // Add pending audio ICE candidates
+          const pending =
+            audioPendingCandidates.current.get(data.fromUserId) || [];
+          for (const candidate of pending) {
+            await pc.addIceCandidate(candidate);
+            console.log(
+              `🧊 Added pending audio ICE candidate for ${data.fromUserId}`
+            );
+          }
+          audioPendingCandidates.current.delete(data.fromUserId);
+
+          // Create answer
+          console.log(`📞 Creating audio answer for ${data.fromUserId}`);
+          const answer = await pc.createAnswer();
+          await pc.setLocalDescription(answer);
+
+          // Send answer
+          socket.emit("audio-webrtc-answer", {
+            roomId,
+            toUserId: data.fromUserId,
+            answer,
+          });
+        } catch (error) {
+          console.error("❌ Failed to handle audio offer:", error);
+        }
+      }
+    );
+
+    // Handle audio WebRTC answer
+    socket.on(
+      "audio-webrtc-answer",
+      async (data: {
+        answer: RTCSessionDescriptionInit;
+        fromUserId: string;
+      }) => {
+        console.log(`🎤 Received audio answer from ${data.fromUserId}`);
+
+        try {
+          const pc = audioPeerConnections.current.get(data.fromUserId);
+          if (pc) {
+            console.log(`🔄 Audio PC state: ${pc.signalingState}`);
+
+            // Only set remote description if we're in the correct state (have-local-offer)
+            if (pc.signalingState === "have-local-offer") {
+              console.log(
+                `✅ Setting remote audio answer for ${data.fromUserId}`
+              );
+              await pc.setRemoteDescription(data.answer);
+
+              // Add pending audio ICE candidates
+              const pending =
+                audioPendingCandidates.current.get(data.fromUserId) || [];
+              for (const candidate of pending) {
+                await pc.addIceCandidate(candidate);
+                console.log(
+                  `🧊 Added pending audio ICE candidate for ${data.fromUserId}`
+                );
+              }
+              audioPendingCandidates.current.delete(data.fromUserId);
+            } else {
+              console.warn(
+                `⚠️ Cannot set audio answer, PC state: ${pc.signalingState}`
+              );
+            }
+          }
+        } catch (error) {
+          console.error("❌ Failed to handle audio answer:", error);
+        }
+      }
+    );
+
+    // Handle audio ICE candidates
+    socket.on(
+      "audio-webrtc-ice-candidate",
+      async (data: { candidate: RTCIceCandidateInit; fromUserId: string }) => {
+        console.log(`🧊 Received audio ICE candidate from ${data.fromUserId}`);
+
+        try {
+          const pc = audioPeerConnections.current.get(data.fromUserId);
+          if (pc) {
+            console.log(
+              `🔄 Audio PC state: ${
+                pc.signalingState
+              }, remoteDesc: ${!!pc.remoteDescription}`
+            );
+
+            // Only add ICE candidates if we have a remote description and connection is stable
+            if (
+              pc.remoteDescription &&
+              (pc.signalingState === "stable" ||
+                pc.signalingState === "have-remote-offer")
+            ) {
+              await pc.addIceCandidate(data.candidate);
+              console.log(
+                `✅ Added audio ICE candidate for ${data.fromUserId}`
+              );
+            } else {
+              // Store for later use
+              if (!audioPendingCandidates.current.has(data.fromUserId)) {
+                audioPendingCandidates.current.set(data.fromUserId, []);
+              }
+              audioPendingCandidates.current
+                .get(data.fromUserId)!
+                .push(data.candidate);
+              console.log(
+                `📦 Stored audio ICE candidate for later: ${data.fromUserId}`
+              );
+            }
+          } else {
+            console.warn(
+              `⚠️ No audio peer connection found for ${data.fromUserId}`
+            );
+          }
+        } catch (error) {
+          console.error("❌ Failed to add audio ICE candidate:", error);
+        }
+      }
+    );
+
+    return () => {
+      socket.off("audio-webrtc-offer");
+      socket.off("audio-webrtc-answer");
+      socket.off("audio-webrtc-ice-candidate");
+    };
+  }, [socketRef, currentUser.id, roomId, createAudioPeerConnection]);
+
   // Enhanced video toggle that works with WebRTC
   const toggleVideo = useCallback(() => {
     if (localVideoStream) {
@@ -1507,13 +1822,17 @@ export default function SocketGoogleMeetInterface({
         localVideoStream.getTracks().forEach((track) => track.stop());
       }
       peerConnections.current.forEach((pc) => pc.close());
+      audioPeerConnections.current.forEach((pc) => pc.close());
     };
   }, [localVideoStream]);
 
   const canStartMeeting = realTimeParticipants.length >= 2;
 
   return (
-    <div className="min-h-screen w-full bg-[#091717] overflow-x-hidden relative">
+    <div
+      className="min-h-screen w-full bg-[#091717] overflow-x-hidden relative"
+      onClick={tryPlayPendingAudio}
+    >
       {/* Background Effects */}
       <div className="fixed inset-0 z-0 pointer-events-none">
         {Array.from({ length: 40 }).map((_, i) => (
@@ -1758,15 +2077,27 @@ export default function SocketGoogleMeetInterface({
                         Test Microphone Permission
                       </Button>
 
-                      {/* Prepare Audio Button */}
+                      {/* Audio Toggle Button */}
                       <Button
-                        onClick={startAudioStreaming}
-                        className="w-full bg-[#20808D] hover:bg-[#20808D]/90 text-white"
+                        onClick={async () => {
+                          tryPlayPendingAudio();
+                          if (isStreaming) {
+                            await stopAudioStreaming();
+                          } else {
+                            await startAudioStreaming();
+                          }
+                        }}
+                        className={`w-full ${
+                          isStreaming
+                            ? "bg-red-600 hover:bg-red-700"
+                            : "bg-[#20808D] hover:bg-[#20808D]/90"
+                        } text-white`}
                       >
                         <Mic className="w-4 h-4 mr-2" />
-                        Prepare Audio
+                        {isStreaming
+                          ? "Stop Voice Communication"
+                          : "Start Voice Communication"}
                       </Button>
-
 
                       {/* Show video call error if any */}
                       {videoCallError && (
@@ -2173,13 +2504,26 @@ export default function SocketGoogleMeetInterface({
                 transition={{ type: "spring", damping: 15 }}
               >
                 <Button
-                  onClick={startAudioStreaming}
+                  onClick={async () => {
+                    tryPlayPendingAudio();
+                    if (isStreaming) {
+                      await stopAudioStreaming();
+                    } else {
+                      await startAudioStreaming();
+                    }
+                  }}
                   size="lg"
-                  className="w-14 h-14 bg-gradient-to-r from-[#20808D] to-[#2E565E] hover:from-[#20808D]/90 hover:to-[#2E565E]/90 rounded-full border-2 border-[#20808D] text-white"
+                  className={`w-14 h-14 rounded-full border-2 text-white ${
+                    isStreaming
+                      ? "bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 border-red-600"
+                      : "bg-gradient-to-r from-[#20808D] to-[#2E565E] hover:from-[#20808D]/90 hover:to-[#2E565E]/90 border-[#20808D]"
+                  }`}
                   title={
-                    compatibility.isMobile
+                    isStreaming
+                      ? "Stop voice communication"
+                      : compatibility.isMobile
                       ? "Tap to enable microphone (Allow permission when prompted)"
-                      : "Start Audio / Request Microphone Access"
+                      : "Start voice communication"
                   }
                 >
                   <Mic className="w-6 h-6" />

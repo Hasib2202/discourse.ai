@@ -32,7 +32,7 @@ export default function RootLayout({
       >
         {children}
         <Toaster position="top-right" theme="dark" />
-        <Footer />
+        {/* <Footer /> */}
       </body>
     </html>
   );
