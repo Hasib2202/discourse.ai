@@ -306,6 +306,7 @@ export default function MeetingRoomPage({ params }: Props) {
       userDisplayName={userDisplayName}
       onLeaveRoom={handleLeaveRoom}
       isHost={room?.host_id === user.id}
+      hostId={room?.host_id}
     />
   );
 }

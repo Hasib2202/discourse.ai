@@ -56,6 +56,7 @@ interface SocketGoogleMeetInterfaceProps {
   userDisplayName: string;
   onLeaveRoom: () => void;
   isHost?: boolean;
+  hostId?: string;
 }
 
 // Extend window object for pending audio elements
@@ -72,6 +73,7 @@ export default function SocketGoogleMeetInterface({
   userDisplayName,
   onLeaveRoom,
   isHost = false,
+  hostId,
 }: SocketGoogleMeetInterfaceProps) {
   const [isMuted, setIsMuted] = useState(false);
   const [isVideoOn, setIsVideoOn] = useState(false);
@@ -265,11 +267,13 @@ export default function SocketGoogleMeetInterface({
     const activeParticipants = updatedParticipants.map((p) => ({
       ...p,
       is_online: socketParticipants.includes(p.user_id),
+      // Determine role: use hostId to identify the actual host
+      role: (hostId && p.user_id === hostId ? "host" : "participant") as "host" | "participant",
     }));
 
     console.log("✅ Final active participants:", activeParticipants.length);
     setRealTimeParticipants(activeParticipants);
-  }, [participants, socketParticipants, roomId]);
+  }, [participants, socketParticipants, roomId, hostId]);
 
   // Simple microphone permission test
   const requestMicrophonePermission = useCallback(async () => {
@@ -2429,6 +2433,12 @@ export default function SocketGoogleMeetInterface({
                     const status = participantStatus.get(participant.user_id);
                     const isCurrentUser =
                       participant.user_id === currentUser.id;
+
+                    // For current user, use local state instead of socket state
+                    const effectiveStatus = isCurrentUser ? {
+                      isMuted: isMuted,
+                      isRaised: handRaised,
+                    } : status;
                     return (
                       <motion.div
                         key={participant.id}
@@ -2449,6 +2459,7 @@ export default function SocketGoogleMeetInterface({
                             <p className="text-sm font-medium text-white truncate">
                               {participant.profiles.full_name}
                               {isCurrentUser && " (You)"}
+                              {participant.role === "host" && " [Host]"}
                             </p>
                             {participant.role === "host" && (
                               <Crown className="w-3 h-3 text-[#20808D]" />
@@ -2461,10 +2472,10 @@ export default function SocketGoogleMeetInterface({
                           </p>
                         </div>
                         <div className="flex items-center space-x-2">
-                          {status?.isRaised && (
+                          {effectiveStatus?.isRaised && (
                             <Hand className="w-4 h-4 text-yellow-400" />
                           )}
-                          {status?.isMuted ? (
+                          {effectiveStatus?.isMuted ? (
                             <MicOff className="w-4 h-4 text-red-400" />
                           ) : (
                             socketParticipants.includes(
