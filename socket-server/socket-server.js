@@ -11,6 +11,10 @@ const httpServer = createServer();
 const roomParticipants = new Map();
 const participantInfo = new Map();
 
+// Store WebRTC room participants
+const webrtcRooms = new Map();
+const webrtcParticipants = new Map();
+
 // Create Socket.IO server with CORS configuration for Render deployment
 const io = new Server(httpServer, {
     cors: {
@@ -151,6 +155,174 @@ io.on('connection', (socket) => {
         }
     });
 
+    // ===== WebRTC Signaling Handlers =====
+
+    // Handle WebRTC room joining
+    socket.on('join-webrtc-room', (data) => {
+        const { roomId, userId, userName } = data;
+        console.log(`🎥 ${userName} joining WebRTC room ${roomId}`);
+
+        socket.join(`webrtc_${roomId}`);
+        webrtcParticipants.set(socket.id, { userId, userName, roomId });
+
+        if (!webrtcRooms.has(roomId)) {
+            webrtcRooms.set(roomId, new Set());
+        }
+        webrtcRooms.get(roomId).add(userId);
+
+        console.log(`🎥 WebRTC Room ${roomId} now has ${webrtcRooms.get(roomId).size} participants`);
+
+        // Notify existing users about new participant
+        socket.to(`webrtc_${roomId}`).emit('user-joined', { userId, userName });
+
+        // Get existing participants for the new user
+        const existingParticipants = Array.from(webrtcRooms.get(roomId) || [])
+            .filter(id => id !== userId);
+
+        existingParticipants.forEach(existingUserId => {
+            socket.emit('user-joined', { userId: existingUserId, userName: `User ${existingUserId}` });
+        });
+    });
+
+    // Handle WebRTC offer
+    socket.on('webrtc-offer', (data) => {
+        const { roomId, toUserId, offer } = data;
+        const participant = participantInfo.get(socket.id);
+
+        if (participant) {
+            console.log(`📞 WebRTC offer from ${participant.userId} to ${toUserId}`);
+
+            // Find target socket by userId and roomId
+            const targetSocket = Array.from(io.sockets.sockets.values())
+                .find(s => {
+                    const targetParticipant = participantInfo.get(s.id);
+                    return targetParticipant &&
+                        targetParticipant.userId === toUserId &&
+                        targetParticipant.roomId === roomId;
+                });
+
+            if (targetSocket) {
+                console.log(`✅ Sending offer to specific user ${toUserId}`);
+                targetSocket.emit('webrtc-offer', {
+                    offer,
+                    fromUserId: participant.userId
+                });
+            } else {
+                console.warn(`⚠️ Could not find target socket for user ${toUserId} in room ${roomId}`);
+            }
+        } else {
+            console.log(`❌ No participant found for socket ${socket.id}`);
+        }
+    });
+
+    // Handle WebRTC answer
+    socket.on('webrtc-answer', (data) => {
+        const { roomId, toUserId, answer } = data;
+        const participant = participantInfo.get(socket.id);
+
+        if (participant) {
+            console.log(`📞 WebRTC answer from ${participant.userId} to ${toUserId}`);
+
+            // Find target socket by userId and roomId
+            const targetSocket = Array.from(io.sockets.sockets.values())
+                .find(s => {
+                    const targetParticipant = participantInfo.get(s.id);
+                    return targetParticipant &&
+                        targetParticipant.userId === toUserId &&
+                        targetParticipant.roomId === roomId;
+                });
+
+            if (targetSocket) {
+                console.log(`✅ Sending answer to specific user ${toUserId}`);
+                targetSocket.emit('webrtc-answer', {
+                    answer,
+                    fromUserId: participant.userId
+                });
+            } else {
+                console.warn(`⚠️ Could not find target socket for user ${toUserId} in room ${roomId}`);
+            }
+        }
+    });
+
+    // Handle ICE candidates
+    socket.on('webrtc-ice-candidate', (data) => {
+        const { roomId, toUserId, candidate } = data;
+        const participant = participantInfo.get(socket.id);
+
+        if (participant) {
+            console.log(`🧊 ICE candidate from ${participant.userId} to ${toUserId}`);
+
+            // Find target socket by userId and roomId
+            const targetSocket = Array.from(io.sockets.sockets.values())
+                .find(s => {
+                    const targetParticipant = participantInfo.get(s.id);
+                    return targetParticipant &&
+                        targetParticipant.userId === toUserId &&
+                        targetParticipant.roomId === roomId;
+                });
+
+            if (targetSocket) {
+                console.log(`✅ Sending ICE candidate to specific user ${toUserId}`);
+                targetSocket.emit('webrtc-ice-candidate', {
+                    candidate,
+                    fromUserId: participant.userId
+                });
+            } else {
+                console.warn(`⚠️ Could not find target socket for user ${toUserId} in room ${roomId}`);
+            }
+        }
+    });
+
+    // Handle participant mute toggle
+    socket.on('participant-mute-toggle', (data) => {
+        const { roomId, userId, isMuted } = data;
+        console.log(`🔇 ${userId} ${isMuted ? 'muted' : 'unmuted'}`);
+
+        socket.to(`webrtc_${roomId}`).emit('participant-muted', { userId, isMuted });
+    });
+
+    // Handle participant video toggle
+    socket.on('participant-video-toggle', (data) => {
+        const { roomId, userId, isVideoOff } = data;
+        console.log(`📹 ${userId} video ${isVideoOff ? 'off' : 'on'}`);
+
+        socket.to(`webrtc_${roomId}`).emit('participant-video-toggle', { userId, isVideoOff });
+    });
+
+    // Handle leaving WebRTC room
+    socket.on('leave-webrtc-room', (data) => {
+        const { roomId, userId } = data;
+        console.log(`🎥 ${userId} leaving WebRTC room ${roomId}`);
+
+        socket.leave(`webrtc_${roomId}`);
+
+        const webrtcUsers = webrtcRooms.get(roomId);
+        if (webrtcUsers) {
+            webrtcUsers.delete(userId);
+            if (webrtcUsers.size === 0) {
+                webrtcRooms.delete(roomId);
+                console.log(`🎥 Removed empty WebRTC room ${roomId}`);
+            } else {
+                console.log(`🎥 WebRTC Room ${roomId} now has ${webrtcUsers.size} participants`);
+            }
+        }
+
+        // Notify other participants
+        socket.to(`webrtc_${roomId}`).emit('user-left', { userId });
+    });
+
+    // Handle screen sharing events
+    socket.on('screen-share-start', (data) => {
+        const { roomId, userId } = data;
+        console.log(`🖥️ ${userId} started screen sharing in room ${roomId}`);
+        socket.to(`webrtc_${roomId}`).emit('screen-share-started', { userId });
+    });
+
+    socket.on('screen-share-stop', (data) => {
+        const { roomId, userId } = data;
+        console.log(`🖥️ ${userId} stopped screen sharing in room ${roomId}`);
+        socket.to(`webrtc_${roomId}`).emit('screen-share-stopped', { userId });
+    });
 
     // ===== Audio WebRTC Signaling Handlers (separate from video) =====
 
@@ -324,6 +496,8 @@ io.on('connection', (socket) => {
         // Cleanup regular room participation
         const participant = participantInfo.get(socket.id);
 
+        // Cleanup WebRTC room participation
+        const webrtcParticipant = webrtcParticipants.get(socket.id);
         if (participant) {
             const { roomId, userId } = participant;
 
@@ -346,6 +520,27 @@ io.on('connection', (socket) => {
 
             participantInfo.delete(socket.id);
             socket.to(roomId).emit('participant-left', { userId });
+        }
+
+        // Handle WebRTC room cleanup
+        if (webrtcParticipant) {
+            const { roomId, userId } = webrtcParticipant;
+            console.log(`🎥 WebRTC participant ${userId} disconnected from room ${roomId}`);
+
+            // Remove from WebRTC room participants
+            const webrtcUsers = webrtcRooms.get(roomId);
+            if (webrtcUsers) {
+                webrtcUsers.delete(userId);
+                if (webrtcUsers.size === 0) {
+                    webrtcRooms.delete(roomId);
+                    console.log(`🎥 Removed empty WebRTC room ${roomId}`);
+                } else {
+                    console.log(`🎥 WebRTC Room ${roomId} now has ${webrtcUsers.size} participants`);
+                }
+            }
+
+            webrtcParticipants.delete(socket.id);
+            socket.to(`webrtc_${roomId}`).emit('user-left', { userId });
         }
     });
 });
