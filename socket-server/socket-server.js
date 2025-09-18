@@ -34,118 +34,123 @@ console.log('🚀 Socket.IO server starting...');
 io.on('connection', (socket) => {
     console.log('🔗 Client connected:', socket.id);
 
-    // Join room
-    socket.on('join-room', ({ roomId, userId, userName }) => {
+    // Handle room joining
+    socket.on('join-room', (data) => {
+        const { roomId, userId, userName } = data;
         console.log(`👤 ${userName} (${userId}) joining room ${roomId}`);
 
         socket.join(roomId);
-        socket.userId = userId;
-        socket.userName = userName;
-        socket.roomId = roomId;
+        participantInfo.set(socket.id, { userId, userName, roomId });
 
-        // Initialize room if it doesn't exist
         if (!roomParticipants.has(roomId)) {
             roomParticipants.set(roomId, new Set());
         }
+        roomParticipants.get(roomId).add(userId);
 
-        // Add participant to room
-        const roomUsers = roomParticipants.get(roomId);
-        roomUsers.add(userId);
+        console.log(`📊 Room ${roomId} now has ${roomParticipants.get(roomId).size} participants`);
 
-        // Store participant info
-        participantInfo.set(userId, {
-            userName,
-            roomId,
-            socketId: socket.id,
-            isMuted: true,
-            isStreaming: false,
-            isRaised: false,
-            isSpeaking: false
-        });
+        // Get current participant list
+        const currentParticipants = Array.from(roomParticipants.get(roomId) || []);
 
-        console.log(`📊 Room ${roomId} now has ${roomUsers.size} participants`);
+        // Send to the joining user
+        socket.emit('room-participants', currentParticipants);
 
-        // Send updated participant list to all room members
-        io.to(roomId).emit('room-participants', Array.from(roomUsers));
+        // Notify others in the room about new participant
+        socket.to(roomId).emit('participant-joined', { userId, userName });
 
-        // Send participant status to all room members
-        io.to(roomId).emit('participant-status', {
-            userId,
-            userName,
-            status: 'joined'
-        });
-
-        console.log(`📊 Participant status: ${userName} joined`);
+        // Broadcast updated participant list to everyone in the room
+        io.to(roomId).emit('room-participants', currentParticipants);
     });
 
-    // Handle audio status updates
-    socket.on('audio-status', ({ isMuted, isStreaming, volume }) => {
-        const userInfo = participantInfo.get(socket.userId);
-        if (userInfo) {
-            userInfo.isMuted = isMuted;
-            userInfo.isStreaming = isStreaming;
+    // Handle participant status
+    socket.on('participant-status', (data) => {
+        const { userId, userName, status, muted, handRaised } = data;
+        console.log(`📊 Participant status: ${userName} ${status}`);
 
-            console.log(`🎤 ${socket.userId} audio status: muted=${isMuted}, streaming=${isStreaming}`);
+        const participant = participantInfo.get(socket.id);
+        if (participant) {
+            // Broadcast to all participants in the room (including sender)
+            io.to(participant.roomId).emit('participant-status-update', {
+                userId,
+                userName,
+                status,
+                isMuted: muted,
+                isRaised: handRaised
+            });
+        }
+    });
+
+    // Handle audio status
+    socket.on('audio-status', (data) => {
+        const { isMuted, isStreaming } = data;
+        const participant = participantInfo.get(socket.id);
+
+        if (participant) {
+            const { userId, userName } = participant;
+            console.log(`🎤 ${userId} audio status: muted=${isMuted}, streaming=${isStreaming}`);
+            console.log(`📡 Broadcasting participant-audio-update to room ${participant.roomId}`);
 
             // Broadcast to everyone in the room including the sender
-            io.to(socket.roomId).emit('participant-audio-update', {
-                userId: socket.userId,
-                userName: socket.userName,
+            io.to(participant.roomId).emit('participant-audio-update', {
+                userId,
+                userName,
                 isMuted,
-                isStreaming,
-                volume
+                isStreaming
             });
+        } else {
+            console.log(`❌ No participant found for audio status update, socket: ${socket.id}`);
         }
     });
 
     // Handle speaking status
-    socket.on('speaking-status', ({ isSpeaking, volume }) => {
-        const userInfo = participantInfo.get(socket.userId);
-        if (userInfo) {
-            userInfo.isSpeaking = isSpeaking;
+    socket.on('speaking-status', (data) => {
+        const { isSpeaking, volume } = data;
+        const participant = participantInfo.get(socket.id);
 
-            console.log(`🗣️ Speaking status: ${socket.userName} is ${isSpeaking ? 'speaking' : 'not speaking'} (volume: ${volume || 0})`);
+        if (participant) {
+            const { userId, userName } = participant;
 
-            // Broadcast to all participants in the room (including sender for consistency)
-            io.to(socket.roomId).emit('speaking-update', {
-                userId: socket.userId,
-                userName: socket.userName,
-                isSpeaking,
-                volume
-            });
-        }
-    });
+            if (isSpeaking) {
+                console.log(`🗣️ Speaking status: ${userName} is speaking (volume: ${volume})`);
+            }
 
-    // Handle hand raise/lower
-    socket.on('hand-status', ({ isRaised }) => {
-        const userInfo = participantInfo.get(socket.userId);
-        if (userInfo) {
-            userInfo.isRaised = isRaised;
-
-            console.log(`📊 Participant status: ${socket.userName} hand-${isRaised ? 'raised' : 'lowered'}`);
-
-            // Broadcast to everyone in the room including the sender
-            io.to(socket.roomId).emit('participant-hand-update', {
-                userId: socket.userId,
-                userName: socket.userName,
-                isRaised
+            socket.to(participant.roomId).emit('speaking-update', {
+                userId, userName, isSpeaking, volume
             });
         }
     });
 
     // Handle chat messages
-    socket.on('chat-message', ({ message }) => {
-        console.log(`💬 Chat message from ${socket.userName}: ${message}`);
+    socket.on('chat-message', (data) => {
+        const { userId, userName, message, timestamp } = data;
+        console.log(`💬 Chat message from ${userName}: ${message}`);
 
-        // Broadcast to all participants in the room
-        io.to(socket.roomId).emit('chat-message', {
-            id: `${socket.userId}-${Date.now()}`,
-            userId: socket.userId,
-            userName: socket.userName,
-            message,
-            timestamp: new Date().toISOString()
-        });
+        const participant = participantInfo.get(socket.id);
+        if (participant) {
+            io.to(participant.roomId).emit('chat-message', {
+                userId, userName, message, timestamp
+            });
+        }
     });
+
+    // Handle hand raise/lower
+    socket.on('hand-status', (data) => {
+        const { isRaised } = data;
+        const participant = participantInfo.get(socket.id);
+
+        if (participant) {
+            const { userId, userName } = participant;
+            console.log(`✋ Hand raise update: ${userName} hand-${isRaised ? 'raised' : 'lowered'}`);
+
+            // Broadcast to everyone in the room including the sender
+            io.to(participant.roomId).emit('participant-hand-update', {
+                userId,
+                userName,
+                isRaised
+            });
+        }
+    });
+
 
     // ===== Audio WebRTC Signaling Handlers (separate from video) =====
 
@@ -307,38 +312,40 @@ io.on('connection', (socket) => {
         });
     });
 
+    // Handle debug logs from client
+    socket.on('debug-log', (data) => {
+        console.log('🐛 CLIENT DEBUG:', data.message, data);
+    });
+
     // Handle disconnect
     socket.on('disconnect', () => {
         console.log('❌ Client disconnected:', socket.id);
 
-        if (socket.userId && socket.roomId) {
-            console.log(`📊 User ${socket.userId} left room ${socket.roomId}`);
+        // Cleanup regular room participation
+        const participant = participantInfo.get(socket.id);
+
+        if (participant) {
+            const { roomId, userId } = participant;
 
             // Remove from room participants
-            const roomUsers = roomParticipants.get(socket.roomId);
+            const roomUsers = roomParticipants.get(roomId);
             if (roomUsers) {
-                roomUsers.delete(socket.userId);
-                console.log(`📊 Room ${socket.roomId} now has ${roomUsers.size} participants`);
+                roomUsers.delete(userId);
+                console.log(`📊 User ${userId} left room ${roomId}`);
 
-                // If room is empty, remove it
                 if (roomUsers.size === 0) {
-                    roomParticipants.delete(socket.roomId);
-                    console.log(`🗑️ Removed empty room ${socket.roomId}`);
+                    roomParticipants.delete(roomId);
+                    console.log(`🗑️ Removed empty room ${roomId}`);
                 } else {
-                    // Send updated participant list to remaining members
-                    io.to(socket.roomId).emit('room-participants', Array.from(roomUsers));
+                    console.log(`📊 Room ${roomId} now has ${roomUsers.size} participants`);
+                    // Broadcast updated participant list
+                    const currentParticipants = Array.from(roomUsers);
+                    io.to(roomId).emit('room-participants', currentParticipants);
                 }
             }
 
-            // Remove participant info
-            participantInfo.delete(socket.userId);
-
-            // Notify other participants
-            socket.to(socket.roomId).emit('participant-status', {
-                userId: socket.userId,
-                userName: socket.userName,
-                status: 'left'
-            });
+            participantInfo.delete(socket.id);
+            socket.to(roomId).emit('participant-left', { userId });
         }
     });
 });
