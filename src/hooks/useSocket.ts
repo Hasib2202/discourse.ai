@@ -26,9 +26,10 @@ export const useSocket = ({ roomId, userId, userName }: UseSocketProps) => {
     const [participantStatus, setParticipantStatus] = useState<Map<string, ParticipantStatus>>(new Map());
 
     useEffect(() => {
-        // Get socket URL from environment variable or fallback to localhost
-        // Since we're using integrated server.js, connect to the same port as the web server
-        const socketUrl = process.env.NEXT_PUBLIC_SOCKET_URL || 'http://localhost:3002';
+        // Get socket URL - in production it should be the same origin, in dev use localhost
+        const socketUrl = process.env.NODE_ENV === 'production'
+            ? `${window.location.protocol}//${window.location.host}`
+            : (process.env.NEXT_PUBLIC_SOCKET_URL || 'http://localhost:3002');
 
         console.log('🔌 Connecting to Socket.IO server:', socketUrl);
 
@@ -118,7 +119,7 @@ export const useSocket = ({ roomId, userId, userName }: UseSocketProps) => {
             });
         });
 
-        socket.on('audio-status-update', (data: ParticipantStatus) => {
+        socket.on('participant-audio-update', (data: ParticipantStatus) => {
             console.log('🎤 Audio status update received:', data);
             setParticipantStatus(prev => {
                 const newMap = new Map(prev);
@@ -184,6 +185,8 @@ export const useSocket = ({ roomId, userId, userName }: UseSocketProps) => {
         return () => {
             if (socketRef.current) {
                 socketRef.current.off('participant-video-status');
+                socketRef.current.off('participant-audio-update');
+                socketRef.current.off('participant-hand-update');
                 socketRef.current.disconnect();
             }
         };
@@ -204,9 +207,8 @@ export const useSocket = ({ roomId, userId, userName }: UseSocketProps) => {
     const updateAudioStatus = useCallback((isMuted: boolean, isStreaming: boolean) => {
         if (socketRef.current) {
             socketRef.current.emit('audio-status', {
-                userId,
-                muted: isMuted,
-                streaming: isStreaming,
+                isMuted: isMuted,
+                isStreaming: isStreaming,
             });
         }
     }, [userId]);
@@ -214,8 +216,6 @@ export const useSocket = ({ roomId, userId, userName }: UseSocketProps) => {
     const sendSpeakingStatus = useCallback((isSpeaking: boolean, volume?: number) => {
         if (socketRef.current) {
             socketRef.current.emit('speaking-status', {
-                userId,
-                userName,
                 isSpeaking,
                 volume,
             });
@@ -226,8 +226,6 @@ export const useSocket = ({ roomId, userId, userName }: UseSocketProps) => {
         if (socketRef.current) {
             console.log(`🤚 Emitting hand-status: ${userName} hand-${isRaised ? 'raised' : 'lowered'}`);
             socketRef.current.emit('hand-status', {
-                userId,
-                userName,
                 isRaised,
             });
         } else {
