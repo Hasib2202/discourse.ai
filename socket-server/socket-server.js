@@ -87,8 +87,8 @@ io.on('connection', (socket) => {
 
             console.log(`🎤 ${socket.userId} audio status: muted=${isMuted}, streaming=${isStreaming}`);
 
-            // Broadcast to other participants in the room
-            socket.to(socket.roomId).emit('participant-audio-update', {
+            // Broadcast to everyone in the room including the sender
+            io.to(socket.roomId).emit('participant-audio-update', {
                 userId: socket.userId,
                 userName: socket.userName,
                 isMuted,
@@ -124,8 +124,8 @@ io.on('connection', (socket) => {
 
             console.log(`📊 Participant status: ${socket.userName} hand-${isRaised ? 'raised' : 'lowered'}`);
 
-            // Broadcast to other participants in the room
-            socket.to(socket.roomId).emit('participant-hand-update', {
+            // Broadcast to everyone in the room including the sender
+            io.to(socket.roomId).emit('participant-hand-update', {
                 userId: socket.userId,
                 userName: socket.userName,
                 isRaised
