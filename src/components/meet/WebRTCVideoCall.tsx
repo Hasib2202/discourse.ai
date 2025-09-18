@@ -306,7 +306,7 @@ export default function WebRTCVideoCall({
     const localParticipant: Participant = {
       userId,
       userName,
-      stream: localStream,
+      stream: localStream || undefined,
       isMuted,
       isVideoOff,
       isHandRaised: false,
