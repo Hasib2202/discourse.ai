@@ -93,16 +93,20 @@ app.prepare().then(() => {
 
         // Handle audio status
         socket.on('audio-status', (data) => {
-            const { userId, muted, streaming } = data;
-            console.log(`🎤 ${userId} audio status: muted=${muted}, streaming=${streaming}`);
-
+            const { isMuted, isStreaming } = data;
             const participant = participantInfo.get(socket.id);
+
             if (participant) {
-                console.log(`📡 Broadcasting audio-status-update to room ${participant.roomId}`);
-                socket.to(participant.roomId).emit('audio-status-update', {
+                const { userId, userName } = participant;
+                console.log(`🎤 ${userId} audio status: muted=${isMuted}, streaming=${isStreaming}`);
+                console.log(`📡 Broadcasting participant-audio-update to room ${participant.roomId}`);
+
+                // Broadcast to everyone in the room including the sender
+                io.to(participant.roomId).emit('participant-audio-update', {
                     userId,
-                    isMuted: muted,
-                    isStreaming: streaming
+                    userName,
+                    isMuted,
+                    isStreaming
                 });
             } else {
                 console.log(`❌ No participant found for audio status update, socket: ${socket.id}`);
@@ -111,14 +115,16 @@ app.prepare().then(() => {
 
         // Handle speaking status
         socket.on('speaking-status', (data) => {
-            const { userId, userName, isSpeaking, volume } = data;
-
-            if (isSpeaking) {
-                console.log(`🗣️ Speaking status: ${userName} is speaking (volume: ${volume})`);
-            }
-
+            const { isSpeaking, volume } = data;
             const participant = participantInfo.get(socket.id);
+
             if (participant) {
+                const { userId, userName } = participant;
+
+                if (isSpeaking) {
+                    console.log(`🗣️ Speaking status: ${userName} is speaking (volume: ${volume})`);
+                }
+
                 socket.to(participant.roomId).emit('speaking-update', {
                     userId, userName, isSpeaking, volume
                 });
@@ -140,13 +146,15 @@ app.prepare().then(() => {
 
         // Handle hand raise/lower
         socket.on('hand-status', (data) => {
-            const { userId, userName, isRaised } = data;
-            console.log(`✋ Hand raise update: ${userName} hand-${isRaised ? 'raised' : 'lowered'}`);
-
+            const { isRaised } = data;
             const participant = participantInfo.get(socket.id);
+
             if (participant) {
-                // Broadcast to other participants in the room
-                socket.to(participant.roomId).emit('participant-hand-update', {
+                const { userId, userName } = participant;
+                console.log(`✋ Hand raise update: ${userName} hand-${isRaised ? 'raised' : 'lowered'}`);
+
+                // Broadcast to everyone in the room including the sender
+                io.to(participant.roomId).emit('participant-hand-update', {
                     userId,
                     userName,
                     isRaised
