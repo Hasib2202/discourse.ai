@@ -147,6 +147,74 @@ io.on('connection', (socket) => {
         });
     });
 
+    // ===== Audio WebRTC Signaling Handlers (separate from video) =====
+
+    // Handle Audio WebRTC offer
+    socket.on('audio-webrtc-offer', ({ roomId, toUserId, offer }) => {
+        console.log(`🎤 Audio WebRTC offer from ${socket.userId} to ${toUserId}`);
+
+        // Find target socket by userId and roomId
+        const targetSocket = Array.from(io.sockets.sockets.values())
+            .find(s => s.userId === toUserId && s.roomId === roomId);
+
+        if (targetSocket) {
+            console.log(`✅ Sending audio offer to specific user ${toUserId}`);
+            targetSocket.emit('audio-webrtc-offer', {
+                offer,
+                fromUserId: socket.userId
+            });
+        } else {
+            console.warn(`⚠️ Could not find target socket for audio offer to user ${toUserId} in room ${roomId}`);
+        }
+    });
+
+    // Handle Audio WebRTC answer
+    socket.on('audio-webrtc-answer', ({ roomId, toUserId, answer }) => {
+        console.log(`🎤 Audio WebRTC answer from ${socket.userId} to ${toUserId}`);
+
+        // Find target socket by userId and roomId
+        const targetSocket = Array.from(io.sockets.sockets.values())
+            .find(s => s.userId === toUserId && s.roomId === roomId);
+
+        if (targetSocket) {
+            console.log(`✅ Sending audio answer to specific user ${toUserId}`);
+            targetSocket.emit('audio-webrtc-answer', {
+                answer,
+                fromUserId: socket.userId
+            });
+        } else {
+            console.warn(`⚠️ Could not find target socket for audio answer to user ${toUserId} in room ${roomId}`);
+        }
+    });
+
+    // Handle Audio ICE candidates
+    socket.on('audio-webrtc-ice-candidate', ({ roomId, toUserId, candidate }) => {
+        console.log(`🧊 Audio ICE candidate from ${socket.userId} to ${toUserId}`);
+
+        // Find target socket by userId and roomId
+        const targetSocket = Array.from(io.sockets.sockets.values())
+            .find(s => s.userId === toUserId && s.roomId === roomId);
+
+        if (targetSocket) {
+            console.log(`✅ Sending audio ICE candidate to specific user ${toUserId}`);
+            targetSocket.emit('audio-webrtc-ice-candidate', {
+                candidate,
+                fromUserId: socket.userId
+            });
+        } else {
+            console.warn(`⚠️ Could not find target socket for audio ICE candidate to user ${toUserId} in room ${roomId}`);
+        }
+    });
+
+    // Handle host ending meeting for everyone
+    socket.on('host-end-meeting', ({ roomId }) => {
+        console.log(`🏁 Host ending meeting in room ${roomId} for all participants`);
+
+        // Notify all other participants in the room that the meeting has ended
+        socket.to(roomId).emit('meeting-ended-by-host');
+        console.log(`📡 Sent meeting-ended-by-host to all participants in room ${roomId}`);
+    });
+
     // ===== WebRTC Video Call Signaling Events =====
     
     // Handle video call start
