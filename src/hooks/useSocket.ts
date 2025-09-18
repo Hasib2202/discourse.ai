@@ -26,10 +26,8 @@ export const useSocket = ({ roomId, userId, userName }: UseSocketProps) => {
     const [participantStatus, setParticipantStatus] = useState<Map<string, ParticipantStatus>>(new Map());
 
     useEffect(() => {
-        // Get socket URL - in production it should be the same origin, in dev use localhost
-        const socketUrl = process.env.NODE_ENV === 'production'
-            ? `${window.location.protocol}//${window.location.host}`
-            : (process.env.NEXT_PUBLIC_SOCKET_URL || 'http://localhost:3002');
+        // Get socket URL - use environment variable if set, otherwise fallback to localhost for dev
+        const socketUrl = process.env.NEXT_PUBLIC_SOCKET_URL || 'http://localhost:3002';
 
         console.log('🔌 Connecting to Socket.IO server:', socketUrl);
 
