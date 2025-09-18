@@ -20,6 +20,7 @@ const io = new Server(httpServer, {
     cors: {
         origin: [
             "http://localhost:3000",
+            "http://localhost:3002",
             "https://discourse-frontend.vercel.app",
             "https://discourse-frontend-git-devui2-hasib2202s-projects.vercel.app",
             "https://discourse-frontend-git-dev-hasib2202s-projects.vercel.app",
