@@ -20,12 +20,13 @@ const io = new Server(httpServer, {
     cors: {
         origin: [
             "http://localhost:3000",
+            "http://localhost:3001",
             "http://localhost:3002",
-            "https://discourse-frontend.vercel.app",
-            "https://discourse-frontend-git-devui2-hasib2202s-projects.vercel.app",
-            "https://discourse-frontend-git-dev-hasib2202s-projects.vercel.app",
-            "https://discourse-frontend-2qeli4eai-hasib2202s-projects.vercel.app",
-            /\.vercel\.app$/,
+            "http://127.0.0.1:3000",
+            "https://discourse-ai-five.vercel.app",
+            "https://discourse-ai-hasib2202s-projects.vercel.app",
+            "https://discourse-ai-git-main-hasib2202s-projects.vercel.app",
+            /^https:\/\/discourse-ai-.*\.vercel\.app$/,
             /\.onrender\.com$/
         ],
         methods: ["GET", "POST"],
@@ -36,6 +37,7 @@ const io = new Server(httpServer, {
 
 console.log('🚀 Socket.IO server starting...');
 
+// Socket.IO connection handling - COPIED FROM WORKING server.js
 io.on('connection', (socket) => {
     console.log('🔗 Client connected:', socket.id);
 
@@ -328,166 +330,159 @@ io.on('connection', (socket) => {
     // ===== Audio WebRTC Signaling Handlers (separate from video) =====
 
     // Handle Audio WebRTC offer
-    socket.on('audio-webrtc-offer', ({ roomId, toUserId, offer }) => {
-        console.log(`🎤 Audio WebRTC offer from ${socket.userId} to ${toUserId}`);
+    socket.on('audio-webrtc-offer', (data) => {
+        const { roomId, toUserId, offer } = data;
+        const participant = participantInfo.get(socket.id);
 
-        // Find target socket by userId and roomId
-        const targetSocket = Array.from(io.sockets.sockets.values())
-            .find(s => s.userId === toUserId && s.roomId === roomId);
+        if (participant) {
+            console.log(`🎤 Audio WebRTC offer from ${participant.userId} to ${toUserId}`);
 
-        if (targetSocket) {
-            console.log(`✅ Sending audio offer to specific user ${toUserId}`);
-            targetSocket.emit('audio-webrtc-offer', {
-                offer,
-                fromUserId: socket.userId
-            });
+            // Find target socket by userId and roomId
+            const targetSocket = Array.from(io.sockets.sockets.values())
+                .find(s => {
+                    const targetParticipant = participantInfo.get(s.id);
+                    return targetParticipant &&
+                        targetParticipant.userId === toUserId &&
+                        targetParticipant.roomId === roomId;
+                });
+
+            if (targetSocket) {
+                console.log(`✅ Sending audio offer to specific user ${toUserId}`);
+                targetSocket.emit('audio-webrtc-offer', {
+                    offer,
+                    fromUserId: participant.userId
+                });
+            } else {
+                console.warn(`⚠️ Could not find target socket for audio offer to user ${toUserId} in room ${roomId}`);
+            }
         } else {
-            console.warn(`⚠️ Could not find target socket for audio offer to user ${toUserId} in room ${roomId}`);
+            console.log(`❌ No participant found for audio offer from socket ${socket.id}`);
         }
     });
 
     // Handle Audio WebRTC answer
-    socket.on('audio-webrtc-answer', ({ roomId, toUserId, answer }) => {
-        console.log(`🎤 Audio WebRTC answer from ${socket.userId} to ${toUserId}`);
+    socket.on('audio-webrtc-answer', (data) => {
+        const { roomId, toUserId, answer } = data;
+        const participant = participantInfo.get(socket.id);
 
-        // Find target socket by userId and roomId
-        const targetSocket = Array.from(io.sockets.sockets.values())
-            .find(s => s.userId === toUserId && s.roomId === roomId);
+        if (participant) {
+            console.log(`🎤 Audio WebRTC answer from ${participant.userId} to ${toUserId}`);
 
-        if (targetSocket) {
-            console.log(`✅ Sending audio answer to specific user ${toUserId}`);
-            targetSocket.emit('audio-webrtc-answer', {
-                answer,
-                fromUserId: socket.userId
-            });
-        } else {
-            console.warn(`⚠️ Could not find target socket for audio answer to user ${toUserId} in room ${roomId}`);
+            // Find target socket by userId and roomId
+            const targetSocket = Array.from(io.sockets.sockets.values())
+                .find(s => {
+                    const targetParticipant = participantInfo.get(s.id);
+                    return targetParticipant &&
+                        targetParticipant.userId === toUserId &&
+                        targetParticipant.roomId === roomId;
+                });
+
+            if (targetSocket) {
+                console.log(`✅ Sending audio answer to specific user ${toUserId}`);
+                targetSocket.emit('audio-webrtc-answer', {
+                    answer,
+                    fromUserId: participant.userId
+                });
+            } else {
+                console.warn(`⚠️ Could not find target socket for audio answer to user ${toUserId} in room ${roomId}`);
+            }
         }
     });
 
     // Handle Audio ICE candidates
-    socket.on('audio-webrtc-ice-candidate', ({ roomId, toUserId, candidate }) => {
-        console.log(`🧊 Audio ICE candidate from ${socket.userId} to ${toUserId}`);
+    socket.on('audio-webrtc-ice-candidate', (data) => {
+        const { roomId, toUserId, candidate } = data;
+        const participant = participantInfo.get(socket.id);
 
-        // Find target socket by userId and roomId
-        const targetSocket = Array.from(io.sockets.sockets.values())
-            .find(s => s.userId === toUserId && s.roomId === roomId);
+        if (participant) {
+            console.log(`🧊 Audio ICE candidate from ${participant.userId} to ${toUserId}`);
 
-        if (targetSocket) {
-            console.log(`✅ Sending audio ICE candidate to specific user ${toUserId}`);
-            targetSocket.emit('audio-webrtc-ice-candidate', {
-                candidate,
-                fromUserId: socket.userId
-            });
-        } else {
-            console.warn(`⚠️ Could not find target socket for audio ICE candidate to user ${toUserId} in room ${roomId}`);
+            // Find target socket by userId and roomId
+            const targetSocket = Array.from(io.sockets.sockets.values())
+                .find(s => {
+                    const targetParticipant = participantInfo.get(s.id);
+                    return targetParticipant &&
+                        targetParticipant.userId === toUserId &&
+                        targetParticipant.roomId === roomId;
+                });
+
+            if (targetSocket) {
+                console.log(`✅ Sending audio ICE candidate to specific user ${toUserId}`);
+                targetSocket.emit('audio-webrtc-ice-candidate', {
+                    candidate,
+                    fromUserId: participant.userId
+                });
+            } else {
+                console.warn(`⚠️ Could not find target socket for audio ICE candidate to user ${toUserId} in room ${roomId}`);
+            }
         }
     });
 
-    // Handle host ending meeting for everyone
-    socket.on('host-end-meeting', ({ roomId }) => {
-        console.log(`🏁 Host ending meeting in room ${roomId} for all participants`);
-
-        // Notify all other participants in the room that the meeting has ended
-        socket.to(roomId).emit('meeting-ended-by-host');
-        console.log(`📡 Sent meeting-ended-by-host to all participants in room ${roomId}`);
-    });
-
-    // ===== WebRTC Video Call Signaling Events =====
-    
     // Handle video call start
-    socket.on('video-call-start', ({ roomId, userId, userName }) => {
+    socket.on('video-call-start', (data) => {
+        const { roomId, userId, userName } = data;
         console.log(`🎥 ${userName} started video call in room ${roomId}`);
-        
-        // Notify all other participants in the room that this user joined the video call
-        socket.to(roomId).emit('video-call-user-joined', {
-            userId,
-            userName
-        });
+
+        // Notify OTHER participants that this user joined the video call
+        // Don't include the sender (they already know they started it)
+        socket.to(roomId).emit('video-call-user-joined', { userId, userName });
+        console.log(`📡 Notified other participants in room ${roomId} that ${userName} joined video call`);
     });
 
-    // Handle video call stop  
-    socket.on('video-call-stop', ({ roomId, userId }) => {
-        console.log(`🛑 ${socket.userName} stopped video call in room ${roomId}`);
-        
-        // Notify all other participants in the room that this user left the video call
-        socket.to(roomId).emit('video-call-user-left', {
-            userId
-        });
+    // Handle video call stop
+    socket.on('video-call-stop', (data) => {
+        const { roomId, userId } = data;
+        console.log(`🎥 ${userId} stopped video call in room ${roomId}`);
+
+        // Notify other participants that someone left video call
+        socket.to(roomId).emit('video-call-user-left', { userId });
     });
 
-    // Handle WebRTC offer
-    socket.on('webrtc-offer', ({ roomId, toUserId, offer }) => {
-        console.log(`📞 Relaying WebRTC offer from ${socket.userId} to ${toUserId} in room ${roomId}`);
-        
-        // Forward the offer to the specific user
-        const targetSocket = Array.from(io.sockets.sockets.values())
-            .find(s => s.userId === toUserId && s.roomId === roomId);
-            
-        if (targetSocket) {
-            targetSocket.emit('webrtc-offer', {
-                offer,
-                fromUserId: socket.userId
+    // Video status handler (for client compatibility)
+    socket.on('participant-video-status', (data) => {
+        const { userId, userName, isVideoOn } = data;
+        const participant = participantInfo.get(socket.id);
+
+        if (participant) {
+            console.log('📹 Video status update:', data);
+
+            // Broadcast to other participants in the room
+            socket.to(participant.roomId).emit('participant-video-status', {
+                userId,
+                userName,
+                isVideoOn
             });
-            console.log(`✅ Successfully relayed offer to ${toUserId}`);
-        } else {
-            console.warn(`⚠️ Could not find target socket for user ${toUserId}`);
         }
     });
 
-    // Handle WebRTC answer
-    socket.on('webrtc-answer', ({ roomId, toUserId, answer }) => {
-        console.log(`📞 Relaying WebRTC answer from ${socket.userId} to ${toUserId} in room ${roomId}`);
-        
-        // Forward the answer to the specific user
-        const targetSocket = Array.from(io.sockets.sockets.values())
-            .find(s => s.userId === toUserId && s.roomId === roomId);
-            
-        if (targetSocket) {
-            targetSocket.emit('webrtc-answer', {
-                answer,
-                fromUserId: socket.userId
-            });
-            console.log(`✅ Successfully relayed answer to ${toUserId}`);
-        } else {
-            console.warn(`⚠️ Could not find target socket for user ${toUserId}`);
-        }
-    });
+    // Handle audio data streaming
+    socket.on('audio-data', (data) => {
+        const { userId, audioData, timestamp } = data;
+        const participant = participantInfo.get(socket.id);
 
-    // Handle WebRTC ICE candidates
-    socket.on('webrtc-ice-candidate', ({ roomId, toUserId, candidate }) => {
-        console.log(`🧊 Relaying ICE candidate from ${socket.userId} to ${toUserId} in room ${roomId}`);
-        
-        // Forward the ICE candidate to the specific user  
-        const targetSocket = Array.from(io.sockets.sockets.values())
-            .find(s => s.userId === toUserId && s.roomId === roomId);
-            
-        if (targetSocket) {
-            targetSocket.emit('webrtc-ice-candidate', {
-                candidate,
-                fromUserId: socket.userId
+        if (participant) {
+            // Broadcast audio data to all other participants in the room
+            socket.to(participant.roomId).emit('audio-data', {
+                userId,
+                audioData,
+                timestamp
             });
-            console.log(`✅ Successfully relayed ICE candidate to ${toUserId}`);
-        } else {
-            console.warn(`⚠️ Could not find target socket for user ${toUserId}`);
         }
-    });
-
-    // Handle participant video toggle (optional - for UI updates)
-    socket.on('participant-video-toggle', ({ roomId, userId, isVideoOn }) => {
-        console.log(`📹 ${socket.userName} ${isVideoOn ? 'turned on' : 'turned off'} video in room ${roomId}`);
-        
-        // Broadcast video status to other participants  
-        socket.to(roomId).emit('participant-video-status', {
-            userId,
-            userName: socket.userName,
-            isVideoOn
-        });
     });
 
     // Handle debug logs from client
     socket.on('debug-log', (data) => {
         console.log('🐛 CLIENT DEBUG:', data.message, data);
+    });
+
+    // Handle host ending meeting for everyone
+    socket.on('host-end-meeting', (data) => {
+        const { roomId } = data;
+        console.log(`🏁 Host ending meeting in room ${roomId} for all participants`);
+
+        // Notify all other participants in the room that the meeting has ended
+        socket.to(roomId).emit('meeting-ended-by-host');
+        console.log(`📡 Sent meeting-ended-by-host to all participants in room ${roomId}`);
     });
 
     // Handle disconnect
