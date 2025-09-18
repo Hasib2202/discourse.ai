@@ -169,7 +169,7 @@ export default function LandingPage() {
             initial={{ opacity: 0, y: 50 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 1, delay: 0.4 }}
-            className="mb-8 text-5xl font-bold leading-tight text-white md:text-6xl lg:text-7xl"
+            className="px-4 mb-6 text-3xl font-bold leading-tight text-white sm:mb-8 sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl sm:px-0"
           >
             <motion.div
               initial={{ x: -100 }}
@@ -195,7 +195,7 @@ export default function LandingPage() {
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 1 }}
-            className="max-w-3xl mx-auto mb-12 text-xl leading-relaxed text-white/90"
+            className="max-w-sm px-6 mx-auto mb-8 text-base leading-relaxed sm:max-w-2xl lg:max-w-3xl sm:px-4 lg:px-0 sm:mb-12 sm:text-lg lg:text-xl text-white/90"
           >
             Elevate your argumentation with cutting-edge AI analysis, real-time
             fact-checking, and structured feedback. Perfect for students,
@@ -248,9 +248,9 @@ export default function LandingPage() {
             transition={{ duration: 0.8, delay: 1.4 }}
             className="mb-16"
           >
-            <div className="relative overflow-hidden bg-gradient-to-r from-[#02BD9B]/10 via-[#02BD9B]/8 to-[#02BD9B]/10 backdrop-blur-xl border border-[#02BD9B]/20 rounded-2xl py-4 shadow-2xl">
+            <div className="relative overflow-hidden bg-gradient-to-r from-[#02BD9B]/10 via-[#02BD9B]/8 to-[#02BD9B]/10 backdrop-blur-xl border border-[#02BD9B]/20 rounded-2xl py-3 sm:py-4 shadow-2xl mx-4 sm:mx-0">
               <motion.div
-                className="flex space-x-8 whitespace-nowrap"
+                className="flex space-x-4 sm:space-x-8 whitespace-nowrap"
                 animate={{ x: [0, -2000] }}
                 transition={{
                   repeat: Infinity,
@@ -263,7 +263,7 @@ export default function LandingPage() {
                   marqueeItems.map((item, index) => (
                     <span
                       key={`${groupIndex}-${index}`}
-                      className="text-[#02BD9B] font-semibold text-lg whitespace-nowrap px-4"
+                      className="text-[#02BD9B] font-semibold text-sm sm:text-base lg:text-lg whitespace-nowrap px-2 sm:px-4"
                     >
                       {item}
                     </span>
@@ -272,13 +272,13 @@ export default function LandingPage() {
               </motion.div>
             </div>
           </motion.div>
-
-          <motion.div
+            <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 0.8, delay: 1.6 }}
-            className="flex flex-wrap items-center justify-center gap-8 mb-12 text-white/70"
-          >
+            // Use flex-col on mobile, flex-row on sm+
+            className="flex flex-col flex-wrap items-center justify-center gap-4 px-4 mb-12 sm:flex-row sm:gap-6 lg:gap-8 text-white/70 sm:px-0"
+            >
             {[
               { icon: CheckCircle, text: "Free to Start" },
               { icon: Zap, text: "AI-Powered" },
@@ -286,33 +286,33 @@ export default function LandingPage() {
               { icon: Star, text: "5-Star Rated" },
             ].map((item, index) => (
               <motion.div
-                key={index}
-                initial={{ scale: 0 }}
-                animate={{ scale: 1 }}
-                transition={{ delay: 1.8 + index * 0.1, type: "spring" }}
-                className="flex items-center space-x-2 cursor-pointer group"
+              key={index}
+              initial={{ scale: 0 }}
+              animate={{ scale: 1 }}
+              transition={{ delay: 1.8 + index * 0.1, type: "spring" }}
+              className="flex items-center space-x-1 cursor-pointer sm:space-x-2 group"
               >
-                <item.icon className="h-5 w-5 text-[#02BD9B] group-hover:scale-110 transition-transform" />
-                <span className="group-hover:text-[#02BD9B] transition-colors">
-                  {item.text}
-                </span>
+              <item.icon className="h-4 w-4 sm:h-5 sm:w-5 text-[#02BD9B] group-hover:scale-110 transition-transform" />
+              <span className="group-hover:text-[#02BD9B] transition-colors text-sm sm:text-base">
+                {item.text}
+              </span>
               </motion.div>
             ))}
-          </motion.div>
+            </motion.div>
 
-          <motion.div
+            <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 0.8, delay: 2 }}
-            className="absolute transform -translate-x-1/2 bottom-8 left-1/2"
-          >
+            className="absolute pt-8 transform -translate-x-1/2 left-1/2 bottom-2"
+            >
             <motion.div
               animate={{ y: [0, -10, 0] }}
               transition={{ duration: 2, repeat: Infinity }}
             >
               <ChevronDown className="w-6 h-6 text-white/40" />
             </motion.div>
-          </motion.div>
+            </motion.div>
         </div>
       </section>
 

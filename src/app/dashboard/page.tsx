@@ -920,7 +920,7 @@ export default function DashboardPage() {
                       <Button
                         className="w-full bg-gradient-to-r from-[#02BD9B]/30 to-[#02BD9B]/30 hover:from-[#02BD9B] hover:to-[#02BD9B] text-white border-2 border-[#02BD9B]/50 hover:border-[#02BD9B] transition-all duration-300 py-3 text-lg font-semibold shadow-lg"
                         onClick={() => {
-                          if (isOwner) {
+                          if (isOwner || !room.is_private) {
                             router.push(`/room/${room.id}`);
                           } else {
                             setShowJoinRoom(true);
@@ -929,7 +929,7 @@ export default function DashboardPage() {
                         }}
                       >
                         <Eye className="w-5 h-5 mr-2" />
-                        {isOwner ? "Enter Room" : "Join with Code"}
+                        {isOwner ? "Enter Room" : room.is_private ? "Join with Code" : "Join Room"}
                       </Button>
                     </motion.div>
                   </CardContent>

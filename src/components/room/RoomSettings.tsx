@@ -394,7 +394,7 @@ export default function RoomSettings({
             <Clock className="w-4 h-4 text-yellow-400" />
             <span className="text-sm font-semibold text-yellow-400">
               {room.status === "waiting"
-                ? "Waiting for participants to get ready"
+                ? "Waiting for host to start the debate"
                 : room.status === "active"
                 ? "Debate is in progress"
                 : "Debate completed"}

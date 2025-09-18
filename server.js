@@ -6,7 +6,7 @@ import { Server } from 'socket.io';
 
 const dev = process.env.NODE_ENV !== 'production';
 const hostname = 'localhost';
-const port = process.env.PORT || 3002;
+const port = process.env.PORT || 3001;
 
 // Create Next.js app
 const app = next({ dev, hostname, port });
@@ -155,29 +155,29 @@ app.prepare().then(() => {
         });
 
         // ===== WebRTC Signaling Handlers =====
-        
+
         // Handle WebRTC room joining
         socket.on('join-webrtc-room', (data) => {
             const { roomId, userId, userName } = data;
             console.log(`🎥 ${userName} joining WebRTC room ${roomId}`);
-            
+
             socket.join(`webrtc_${roomId}`);
             webrtcParticipants.set(socket.id, { userId, userName, roomId });
-            
+
             if (!webrtcRooms.has(roomId)) {
                 webrtcRooms.set(roomId, new Set());
             }
             webrtcRooms.get(roomId).add(userId);
-            
+
             console.log(`🎥 WebRTC Room ${roomId} now has ${webrtcRooms.get(roomId).size} participants`);
-            
+
             // Notify existing users about new participant
             socket.to(`webrtc_${roomId}`).emit('user-joined', { userId, userName });
-            
+
             // Get existing participants for the new user
             const existingParticipants = Array.from(webrtcRooms.get(roomId) || [])
                 .filter(id => id !== userId);
-            
+
             existingParticipants.forEach(existingUserId => {
                 socket.emit('user-joined', { userId: existingUserId, userName: `User ${existingUserId}` });
             });
@@ -187,19 +187,19 @@ app.prepare().then(() => {
         socket.on('webrtc-offer', (data) => {
             const { roomId, toUserId, offer } = data;
             const participant = participantInfo.get(socket.id);
-            
+
             if (participant) {
                 console.log(`📞 WebRTC offer from ${participant.userId} to ${toUserId}`);
-                
+
                 // Find target socket by userId and roomId
                 const targetSocket = Array.from(io.sockets.sockets.values())
                     .find(s => {
                         const targetParticipant = participantInfo.get(s.id);
-                        return targetParticipant && 
-                               targetParticipant.userId === toUserId && 
-                               targetParticipant.roomId === roomId;
+                        return targetParticipant &&
+                            targetParticipant.userId === toUserId &&
+                            targetParticipant.roomId === roomId;
                     });
-                
+
                 if (targetSocket) {
                     console.log(`✅ Sending offer to specific user ${toUserId}`);
                     targetSocket.emit('webrtc-offer', {
@@ -218,19 +218,19 @@ app.prepare().then(() => {
         socket.on('webrtc-answer', (data) => {
             const { roomId, toUserId, answer } = data;
             const participant = participantInfo.get(socket.id);
-            
+
             if (participant) {
                 console.log(`📞 WebRTC answer from ${participant.userId} to ${toUserId}`);
-                
+
                 // Find target socket by userId and roomId
                 const targetSocket = Array.from(io.sockets.sockets.values())
                     .find(s => {
                         const targetParticipant = participantInfo.get(s.id);
-                        return targetParticipant && 
-                               targetParticipant.userId === toUserId && 
-                               targetParticipant.roomId === roomId;
+                        return targetParticipant &&
+                            targetParticipant.userId === toUserId &&
+                            targetParticipant.roomId === roomId;
                     });
-                
+
                 if (targetSocket) {
                     console.log(`✅ Sending answer to specific user ${toUserId}`);
                     targetSocket.emit('webrtc-answer', {
@@ -247,19 +247,19 @@ app.prepare().then(() => {
         socket.on('webrtc-ice-candidate', (data) => {
             const { roomId, toUserId, candidate } = data;
             const participant = participantInfo.get(socket.id);
-            
+
             if (participant) {
                 console.log(`🧊 ICE candidate from ${participant.userId} to ${toUserId}`);
-                
+
                 // Find target socket by userId and roomId
                 const targetSocket = Array.from(io.sockets.sockets.values())
                     .find(s => {
                         const targetParticipant = participantInfo.get(s.id);
-                        return targetParticipant && 
-                               targetParticipant.userId === toUserId && 
-                               targetParticipant.roomId === roomId;
+                        return targetParticipant &&
+                            targetParticipant.userId === toUserId &&
+                            targetParticipant.roomId === roomId;
                     });
-                
+
                 if (targetSocket) {
                     console.log(`✅ Sending ICE candidate to specific user ${toUserId}`);
                     targetSocket.emit('webrtc-ice-candidate', {
@@ -276,7 +276,7 @@ app.prepare().then(() => {
         socket.on('participant-mute-toggle', (data) => {
             const { roomId, userId, isMuted } = data;
             console.log(`🔇 ${userId} ${isMuted ? 'muted' : 'unmuted'}`);
-            
+
             socket.to(`webrtc_${roomId}`).emit('participant-muted', { userId, isMuted });
         });
 
@@ -284,7 +284,7 @@ app.prepare().then(() => {
         socket.on('participant-video-toggle', (data) => {
             const { roomId, userId, isVideoOff } = data;
             console.log(`📹 ${userId} video ${isVideoOff ? 'off' : 'on'}`);
-            
+
             socket.to(`webrtc_${roomId}`).emit('participant-video-toggle', { userId, isVideoOff });
         });
 
@@ -292,9 +292,9 @@ app.prepare().then(() => {
         socket.on('leave-webrtc-room', (data) => {
             const { roomId, userId } = data;
             console.log(`🎥 ${userId} leaving WebRTC room ${roomId}`);
-            
+
             socket.leave(`webrtc_${roomId}`);
-            
+
             const webrtcUsers = webrtcRooms.get(roomId);
             if (webrtcUsers) {
                 webrtcUsers.delete(userId);
@@ -305,7 +305,7 @@ app.prepare().then(() => {
                     console.log(`🎥 WebRTC Room ${roomId} now has ${webrtcUsers.size} participants`);
                 }
             }
-            
+
             // Notify other participants
             socket.to(`webrtc_${roomId}`).emit('user-left', { userId });
         });
@@ -324,24 +324,24 @@ app.prepare().then(() => {
         });
 
         // ===== Audio WebRTC Signaling Handlers (separate from video) =====
-        
+
         // Handle Audio WebRTC offer
         socket.on('audio-webrtc-offer', (data) => {
             const { roomId, toUserId, offer } = data;
             const participant = participantInfo.get(socket.id);
-            
+
             if (participant) {
                 console.log(`🎤 Audio WebRTC offer from ${participant.userId} to ${toUserId}`);
-                
+
                 // Find target socket by userId and roomId
                 const targetSocket = Array.from(io.sockets.sockets.values())
                     .find(s => {
                         const targetParticipant = participantInfo.get(s.id);
-                        return targetParticipant && 
-                               targetParticipant.userId === toUserId && 
-                               targetParticipant.roomId === roomId;
+                        return targetParticipant &&
+                            targetParticipant.userId === toUserId &&
+                            targetParticipant.roomId === roomId;
                     });
-                
+
                 if (targetSocket) {
                     console.log(`✅ Sending audio offer to specific user ${toUserId}`);
                     targetSocket.emit('audio-webrtc-offer', {
@@ -360,19 +360,19 @@ app.prepare().then(() => {
         socket.on('audio-webrtc-answer', (data) => {
             const { roomId, toUserId, answer } = data;
             const participant = participantInfo.get(socket.id);
-            
+
             if (participant) {
                 console.log(`🎤 Audio WebRTC answer from ${participant.userId} to ${toUserId}`);
-                
+
                 // Find target socket by userId and roomId
                 const targetSocket = Array.from(io.sockets.sockets.values())
                     .find(s => {
                         const targetParticipant = participantInfo.get(s.id);
-                        return targetParticipant && 
-                               targetParticipant.userId === toUserId && 
-                               targetParticipant.roomId === roomId;
+                        return targetParticipant &&
+                            targetParticipant.userId === toUserId &&
+                            targetParticipant.roomId === roomId;
                     });
-                
+
                 if (targetSocket) {
                     console.log(`✅ Sending audio answer to specific user ${toUserId}`);
                     targetSocket.emit('audio-webrtc-answer', {
@@ -389,19 +389,19 @@ app.prepare().then(() => {
         socket.on('audio-webrtc-ice-candidate', (data) => {
             const { roomId, toUserId, candidate } = data;
             const participant = participantInfo.get(socket.id);
-            
+
             if (participant) {
                 console.log(`🧊 Audio ICE candidate from ${participant.userId} to ${toUserId}`);
-                
+
                 // Find target socket by userId and roomId
                 const targetSocket = Array.from(io.sockets.sockets.values())
                     .find(s => {
                         const targetParticipant = participantInfo.get(s.id);
-                        return targetParticipant && 
-                               targetParticipant.userId === toUserId && 
-                               targetParticipant.roomId === roomId;
+                        return targetParticipant &&
+                            targetParticipant.userId === toUserId &&
+                            targetParticipant.roomId === roomId;
                     });
-                
+
                 if (targetSocket) {
                     console.log(`✅ Sending audio ICE candidate to specific user ${toUserId}`);
                     targetSocket.emit('audio-webrtc-ice-candidate', {
@@ -418,7 +418,7 @@ app.prepare().then(() => {
         socket.on('video-call-start', (data) => {
             const { roomId, userId, userName } = data;
             console.log(`🎥 ${userName} started video call in room ${roomId}`);
-            
+
             // Notify OTHER participants that this user joined the video call
             // Don't include the sender (they already know they started it)
             socket.to(roomId).emit('video-call-user-joined', { userId, userName });
@@ -429,7 +429,7 @@ app.prepare().then(() => {
         socket.on('video-call-stop', (data) => {
             const { roomId, userId } = data;
             console.log(`🎥 ${userId} stopped video call in room ${roomId}`);
-            
+
             // Notify other participants that someone left video call
             socket.to(roomId).emit('video-call-user-left', { userId });
         });
@@ -445,7 +445,7 @@ app.prepare().then(() => {
 
             // Cleanup regular room participation
             const participant = participantInfo.get(socket.id);
-            
+
             // Cleanup WebRTC room participation
             const webrtcParticipant = webrtcParticipants.get(socket.id);
             if (participant) {
@@ -471,12 +471,12 @@ app.prepare().then(() => {
                 participantInfo.delete(socket.id);
                 socket.to(roomId).emit('participant-left', { userId });
             }
-            
+
             // Handle WebRTC room cleanup
             if (webrtcParticipant) {
                 const { roomId, userId } = webrtcParticipant;
                 console.log(`🎥 WebRTC participant ${userId} disconnected from room ${roomId}`);
-                
+
                 // Remove from WebRTC room participants
                 const webrtcUsers = webrtcRooms.get(roomId);
                 if (webrtcUsers) {
@@ -488,7 +488,7 @@ app.prepare().then(() => {
                         console.log(`🎥 WebRTC Room ${roomId} now has ${webrtcUsers.size} participants`);
                     }
                 }
-                
+
                 webrtcParticipants.delete(socket.id);
                 socket.to(`webrtc_${roomId}`).emit('user-left', { userId });
             }

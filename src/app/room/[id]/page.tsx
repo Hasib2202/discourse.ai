@@ -81,6 +81,9 @@ export default function RoomLobbyPage() {
   const [isHost, setIsHost] = useState(false);
   const [currentParticipant, setCurrentParticipant] =
     useState<Participant | null>(null);
+  const [showCodePrompt, setShowCodePrompt] = useState(false);
+  const [enteredCode, setEnteredCode] = useState("");
+  const [isJoining, setIsJoining] = useState(false);
 
   // Prevent duplicate join attempts
   const joiningRef = useRef(false);
@@ -433,14 +436,41 @@ export default function RoomLobbyPage() {
   // Auto-join room when user and room are loaded (only once)
   useEffect(() => {
     if (user && room && !joiningRef.current) {
-      // Small delay to ensure all data is loaded
+      // Check if room is private and user is not the host
+      if (room.is_private && room.host_id !== user.id) {
+        // Check if user is already a participant (they might have joined via dashboard)
+        const checkExistingParticipant = async () => {
+          const { data: existingParticipant } = await supabase
+            .from("participants")
+            .select("*")
+            .eq("room_id", roomId)
+            .eq("user_id", user.id)
+            .maybeSingle();
+
+          if (existingParticipant) {
+            // User is already a participant, proceed normally
+            const timer = setTimeout(() => {
+              joinRoom();
+            }, 100);
+            return () => clearTimeout(timer);
+          } else {
+            // User is not a participant, show code prompt
+            setShowCodePrompt(true);
+          }
+        };
+
+        checkExistingParticipant();
+        return;
+      }
+
+      // For public rooms or room host, auto-join
       const timer = setTimeout(() => {
         joinRoom();
       }, 100);
 
       return () => clearTimeout(timer);
     }
-  }, [user, room, joinRoom]);
+  }, [user, room, joinRoom, roomId]);
 
   const initializeRoom = useCallback(async () => {
     if (initializedRef.current) return;
@@ -481,6 +511,30 @@ export default function RoomLobbyPage() {
       return cleanup;
     }
   }, [roomId, setupSubscriptions]);
+
+  const handleJoinWithCode = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!user || !room || isJoining) return;
+
+    // Verify the entered code matches the room code
+    if (enteredCode.toUpperCase() !== room.room_code) {
+      toast.error("Invalid room code. Please check and try again.");
+      return;
+    }
+
+    setIsJoining(true);
+    try {
+      await joinRoom();
+      setShowCodePrompt(false);
+      setEnteredCode("");
+      toast.success("Joined private room successfully!");
+    } catch (error) {
+      console.error("Error joining with code:", error);
+      toast.error("Failed to join room");
+    } finally {
+      setIsJoining(false);
+    }
+  };
 
   const handleLeaveRoom = async () => {
     if (!user) return;
@@ -637,6 +691,55 @@ export default function RoomLobbyPage() {
           </motion.div>
         </div>
       </main>
+
+      {/* Private Room Code Prompt */}
+      {showCodePrompt && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+          <div className="w-full max-w-md">
+            <div className="border-0 bg-gradient-to-br from-[#040404] to-[#011612] backdrop-blur-2xl shadow-2xl rounded-lg p-6">
+              <div className="pb-6">
+                <h2 className="mb-2 text-2xl font-bold text-white">
+                  Private Room Access
+                </h2>
+                <p className="text-white/70">
+                  This is a private room. Please enter the room code to join.
+                </p>
+              </div>
+              <form onSubmit={handleJoinWithCode} className="space-y-6">
+                <div>
+                  <label className="block mb-3 text-sm font-semibold text-white/90">
+                    Room Code
+                  </label>
+                  <input
+                    value={enteredCode}
+                    onChange={(e) => setEnteredCode(e.target.value.toUpperCase())}
+                    placeholder="XXXXXX"
+                    className="w-full bg-[#040404]/60 border-2 border-[#02BD9B]/30 text-white font-mono text-center text-2xl tracking-[0.5em] placeholder:text-white/60 focus:border-[#02BD9B] py-4 rounded-xl focus:outline-none"
+                    maxLength={6}
+                    required
+                  />
+                </div>
+                <div className="flex gap-4 pt-4">
+                  <button
+                    type="submit"
+                    disabled={isJoining}
+                    className="flex-1 bg-gradient-to-r from-[#02BD9B] to-[#02BD9B]/80 hover:from-[#02BD9B]/90 hover:to-[#02BD9B]/70 text-[#040404] py-4 text-lg font-semibold shadow-xl rounded-lg disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300"
+                  >
+                    {isJoining ? "Joining..." : "Join Room"}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => router.push("/dashboard")}
+                    className="px-8 border-2 border-[#02BD9B]/50 text-white hover:bg-[#02BD9B]/20 py-4 rounded-lg transition-all duration-300"
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
