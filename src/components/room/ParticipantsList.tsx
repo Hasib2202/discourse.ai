@@ -115,7 +115,7 @@ export default function ParticipantsList({
   const getRoleColor = (role: string) => {
     switch (role) {
       case "host": return "#FFD700"
-      case "debater": return "#20808D"
+      case "debater": return "#02BD9B"
       case "audience": return "#6B7280"
       default: return "#6B7280"
     }
@@ -140,7 +140,7 @@ export default function ParticipantsList({
   const getStatusColor = (status: string, isReady: boolean) => {
     if (isReady) return "#10B981"
     if (status === "muted") return "#EF4444"
-    if (status === "speaking") return "#20808D"
+    if (status === "speaking") return "#02BD9B"
     return "#6B7280"
   }
 
@@ -150,10 +150,10 @@ export default function ParticipantsList({
   const audience = participants.filter(p => p.role === "audience")
 
   return (
-    <Card className="border-0 bg-gradient-to-br from-[#13343B]/80 to-[#2E565E]/40 backdrop-blur-xl">
+    <Card className="border-0 bg-gradient-to-br from-[#040404]/80 to-[#02BD9B]/40 backdrop-blur-xl">
       <CardHeader>
         <CardTitle className="flex items-center space-x-3 text-white">
-          <Users className="w-5 h-5 text-[#20808D]" />
+          <Users className="w-5 h-5 text-[#02BD9B]" />
           <span>Participants ({participants.length}/{room.max_participants})</span>
         </CardTitle>
       </CardHeader>
@@ -180,20 +180,20 @@ export default function ParticipantsList({
                     exit={{ opacity: 0, x: 20 }}
                     className={`flex items-center justify-between p-3 rounded-xl border transition-all duration-300 ${
                       isCurrentUser 
-                        ? 'bg-[#20808D]/20 border-[#20808D]/50' 
-                        : 'bg-[#091717]/40 border-[#20808D]/20 hover:border-[#20808D]/40'
+                        ? 'bg-[#02BD9B]/20 border-[#02BD9B]/50' 
+                        : 'bg-[#040404]/40 border-[#02BD9B]/20 hover:border-[#02BD9B]/40'
                     }`}
                   >
                     <div className="flex items-center space-x-3">
                       <div className="relative">
                         <Avatar className="w-10 h-10">
                           <AvatarImage src={participant.profiles.avatar_url} />
-                          <AvatarFallback className="bg-[#20808D]/20 text-[#20808D] font-semibold">
+                          <AvatarFallback className="bg-[#02BD9B]/20 text-[#02BD9B] font-semibold">
                             {participant.profiles.full_name.charAt(0).toUpperCase()}
                           </AvatarFallback>
                         </Avatar>
                         {participant.is_online && (
-                          <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-green-500 border-2 border-[#091717] rounded-full"></div>
+                          <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-green-500 border-2 border-[#040404] rounded-full"></div>
                         )}
                       </div>
                       
@@ -201,7 +201,7 @@ export default function ParticipantsList({
                         <div className="flex items-center space-x-2">
                           <span className="font-semibold text-white">
                             {participant.profiles.full_name}
-                            {isCurrentUser && <span className="text-[#20808D] ml-1">(You)</span>}
+                            {isCurrentUser && <span className="text-[#02BD9B] ml-1">(You)</span>}
                           </span>
                         </div>
                         <div className="flex items-center mt-1 space-x-2">
@@ -233,7 +233,7 @@ export default function ParticipantsList({
                           variant="ghost"
                           onClick={() => handleRoleChange(participant.id, "debater")}
                           disabled={actionLoading === participant.id}
-                          className="h-8 px-2 text-xs hover:bg-[#20808D]/20 text-[#20808D] border border-[#20808D]/40"
+                          className="h-8 px-2 text-xs hover:bg-[#02BD9B]/20 text-[#02BD9B] border border-[#02BD9B]/40"
                           title="Join as Debater"
                         >
                           Join as Debater
@@ -251,7 +251,7 @@ export default function ParticipantsList({
         {debaters.length > 0 && (
           <div className="space-y-3">
             <h4 className="flex items-center space-x-2 text-sm font-semibold tracking-wide uppercase text-white/80">
-              <Mic className="w-4 h-4 text-[#20808D]" />
+              <Mic className="w-4 h-4 text-[#02BD9B]" />
               <span>Debaters ({debaters.length})</span>
             </h4>
             <AnimatePresence>
@@ -268,20 +268,20 @@ export default function ParticipantsList({
                     exit={{ opacity: 0, x: 20 }}
                     className={`flex items-center justify-between p-3 rounded-xl border transition-all duration-300 ${
                       isCurrentUser 
-                        ? 'bg-[#20808D]/20 border-[#20808D]/50' 
-                        : 'bg-[#091717]/40 border-[#20808D]/20 hover:border-[#20808D]/40'
+                        ? 'bg-[#02BD9B]/20 border-[#02BD9B]/50' 
+                        : 'bg-[#040404]/40 border-[#02BD9B]/20 hover:border-[#02BD9B]/40'
                     }`}
                   >
                     <div className="flex items-center space-x-3">
                       <div className="relative">
                         <Avatar className="w-10 h-10">
                           <AvatarImage src={participant.profiles.avatar_url} />
-                          <AvatarFallback className="bg-[#20808D]/20 text-[#20808D] font-semibold">
+                          <AvatarFallback className="bg-[#02BD9B]/20 text-[#02BD9B] font-semibold">
                             {participant.profiles.full_name.charAt(0).toUpperCase()}
                           </AvatarFallback>
                         </Avatar>
                         {participant.is_online && (
-                          <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-green-500 border-2 border-[#091717] rounded-full"></div>
+                          <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-green-500 border-2 border-[#040404] rounded-full"></div>
                         )}
                       </div>
                       
@@ -289,7 +289,7 @@ export default function ParticipantsList({
                         <div className="flex items-center space-x-2">
                           <span className="font-semibold text-white">
                             {participant.profiles.full_name}
-                            {isCurrentUser && <span className="text-[#20808D] ml-1">(You)</span>}
+                            {isCurrentUser && <span className="text-[#02BD9B] ml-1">(You)</span>}
                           </span>
                         </div>
                         <div className="flex items-center mt-1 space-x-2">
@@ -326,7 +326,7 @@ export default function ParticipantsList({
                             variant="ghost"
                             onClick={() => handleRoleChange(participant.id, "audience")}
                             disabled={actionLoading === participant.id}
-                            className="h-8 w-8 p-0 hover:bg-[#20808D]/20 text-[#20808D]"
+                            className="h-8 w-8 p-0 hover:bg-[#02BD9B]/20 text-[#02BD9B]"
                             title="Move to Audience"
                           >
                             <UserMinus className="w-3 h-3" />
@@ -372,20 +372,20 @@ export default function ParticipantsList({
                     exit={{ opacity: 0, x: 20 }}
                     className={`flex items-center justify-between p-3 rounded-xl border transition-all duration-300 ${
                       isCurrentUser 
-                        ? 'bg-[#20808D]/20 border-[#20808D]/50' 
-                        : 'bg-[#091717]/40 border-[#20808D]/20 hover:border-[#20808D]/40'
+                        ? 'bg-[#02BD9B]/20 border-[#02BD9B]/50' 
+                        : 'bg-[#040404]/40 border-[#02BD9B]/20 hover:border-[#02BD9B]/40'
                     }`}
                   >
                     <div className="flex items-center space-x-3">
                       <div className="relative">
                         <Avatar className="w-10 h-10">
                           <AvatarImage src={participant.profiles.avatar_url} />
-                          <AvatarFallback className="bg-[#20808D]/20 text-[#20808D] font-semibold">
+                          <AvatarFallback className="bg-[#02BD9B]/20 text-[#02BD9B] font-semibold">
                             {participant.profiles.full_name.charAt(0).toUpperCase()}
                           </AvatarFallback>
                         </Avatar>
                         {participant.is_online && (
-                          <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-green-500 border-2 border-[#091717] rounded-full"></div>
+                          <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-green-500 border-2 border-[#040404] rounded-full"></div>
                         )}
                       </div>
                       
@@ -393,7 +393,7 @@ export default function ParticipantsList({
                         <div className="flex items-center space-x-2">
                           <span className="font-semibold text-white">
                             {participant.profiles.full_name}
-                            {isCurrentUser && <span className="text-[#20808D] ml-1">(You)</span>}
+                            {isCurrentUser && <span className="text-[#02BD9B] ml-1">(You)</span>}
                           </span>
                         </div>
                         <div className="flex items-center mt-1 space-x-2">
@@ -430,7 +430,7 @@ export default function ParticipantsList({
                             variant="ghost"
                             onClick={() => handleRoleChange(participant.id, "debater")}
                             disabled={actionLoading === participant.id}
-                            className="h-8 w-8 p-0 hover:bg-[#20808D]/20 text-[#20808D]"
+                            className="h-8 w-8 p-0 hover:bg-[#02BD9B]/20 text-[#02BD9B]"
                             title="Promote to Debater"
                           >
                             <UserPlus className="w-3 h-3" />

@@ -16,6 +16,7 @@ interface ParticipantStatus {
     isStreaming: boolean;
     isRaised?: boolean;
     isSpeaking?: boolean;
+    isVideoOff?: boolean;
 }
 
 export const useSocket = ({ roomId, userId, userName }: UseSocketProps) => {
@@ -26,7 +27,8 @@ export const useSocket = ({ roomId, userId, userName }: UseSocketProps) => {
 
     useEffect(() => {
         // Get socket URL from environment variable or fallback to localhost
-        const socketUrl = process.env.NEXT_PUBLIC_SOCKET_URL || 'http://localhost:3001';
+        // Since we're using integrated server.js, connect to the same port as the web server
+        const socketUrl = process.env.NEXT_PUBLIC_SOCKET_URL || 'http://localhost:3002';
 
         console.log('🔌 Connecting to Socket.IO server:', socketUrl);
 
@@ -40,10 +42,12 @@ export const useSocket = ({ roomId, userId, userName }: UseSocketProps) => {
 
         // Connection events
         socket.on('connect', () => {
-            console.log('✅ Connected to Socket.IO server');
+            console.log('✅ CLAUDE DEBUG: Connected to Socket.IO server');
+            console.log('✅ CLAUDE DEBUG: Socket ID:', socket.id);
             setIsConnected(true);
 
             // Join the room
+            console.log('🚪 CLAUDE DEBUG: Emitting join-room event:', { roomId, userId, userName });
             socket.emit('join-room', {
                 roomId,
                 userId,
@@ -76,9 +80,11 @@ export const useSocket = ({ roomId, userId, userName }: UseSocketProps) => {
         });
 
         // Room events
-        socket.on('participants-updated', (participantList: string[]) => {
-            console.log('👥 Room participants updated:', participantList);
+        socket.on('room-participants', (participantList: string[]) => {
+            console.log('👥 CLAUDE DEBUG: Room participants updated:', participantList);
+            console.log('👥 CLAUDE DEBUG: Setting participants state...');
             setParticipants(participantList);
+            console.log('👥 CLAUDE DEBUG: Participants state should now be set');
         });
 
         socket.on('participant-joined', (data: { userId: string; userName: string }) => {
@@ -112,7 +118,7 @@ export const useSocket = ({ roomId, userId, userName }: UseSocketProps) => {
             });
         });
 
-        socket.on('participant-audio-update', (data: ParticipantStatus) => {
+        socket.on('audio-status-update', (data: ParticipantStatus) => {
             console.log('🎤 Audio status update received:', data);
             setParticipantStatus(prev => {
                 const newMap = new Map(prev);
@@ -155,6 +161,19 @@ export const useSocket = ({ roomId, userId, userName }: UseSocketProps) => {
             });
         });
 
+        // Video status handler
+        socket.on('participant-video-status', (data: { userId: string; userName: string; isVideoOn: boolean }) => {
+            console.log('📹 Video status update:', data);
+            setParticipantStatus(prev => {
+                const newMap = new Map(prev);
+                const existing = newMap.get(data.userId) || { userId: data.userId, isMuted: false, isStreaming: false };
+
+                // Update the video status (note: isVideoOff is opposite of isVideoOn)
+                newMap.set(data.userId, { ...existing, isVideoOff: !data.isVideoOn });
+                return newMap;
+            });
+        });
+
         // Chat message handler
         socket.on('chat-message', (data: { userId: string; userName: string; message: string; timestamp: string }) => {
             console.log('💬 Chat message received:', data);
@@ -164,6 +183,7 @@ export const useSocket = ({ roomId, userId, userName }: UseSocketProps) => {
         // Cleanup function
         return () => {
             if (socketRef.current) {
+                socketRef.current.off('participant-video-status');
                 socketRef.current.disconnect();
             }
         };
@@ -184,11 +204,12 @@ export const useSocket = ({ roomId, userId, userName }: UseSocketProps) => {
     const updateAudioStatus = useCallback((isMuted: boolean, isStreaming: boolean) => {
         if (socketRef.current) {
             socketRef.current.emit('audio-status', {
-                isMuted,
-                isStreaming,
+                userId,
+                muted: isMuted,
+                streaming: isStreaming,
             });
         }
-    }, []);
+    }, [userId]);
 
     const sendSpeakingStatus = useCallback((isSpeaking: boolean, volume?: number) => {
         if (socketRef.current) {
@@ -203,11 +224,16 @@ export const useSocket = ({ roomId, userId, userName }: UseSocketProps) => {
 
     const toggleHandRaise = useCallback((isRaised: boolean) => {
         if (socketRef.current) {
+            console.log(`🤚 Emitting hand-status: ${userName} hand-${isRaised ? 'raised' : 'lowered'}`);
             socketRef.current.emit('hand-status', {
+                userId,
+                userName,
                 isRaised,
             });
+        } else {
+            console.error('❌ Socket not connected, cannot emit hand-status');
         }
-    }, []);
+    }, [userId, userName]);
 
     const sendAudioData = useCallback((audioData: ArrayBuffer) => {
         if (socketRef.current) {
@@ -221,6 +247,8 @@ export const useSocket = ({ roomId, userId, userName }: UseSocketProps) => {
         }
     }, [userId]);
 
+    console.log('🔄 CLAUDE DEBUG: useSocket returning participants:', participants);
+    
     return {
         isConnected,
         participants,

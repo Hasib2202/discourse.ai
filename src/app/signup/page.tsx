@@ -127,13 +127,13 @@ export default function SignupPage() {
   };
 
   return (
-    <div className="min-h-screen w-full bg-[#091717] flex items-center justify-center p-4 overflow-hidden relative">
+    <div className="min-h-screen w-full bg-[#040404] flex items-center justify-center p-4 overflow-hidden relative">
       {/* Floating Background Particles */}
       <div className="fixed inset-0 z-0 pointer-events-none">
         {particles.map((particle, i) => (
           <motion.div
             key={i}
-            className="absolute w-1 h-1 bg-[#20808D]/15 rounded-full"
+            className="absolute w-1 h-1 bg-[#02BD9B]/15 rounded-full"
             style={{
               left: `${particle.left}%`,
               top: `${particle.top}%`,
@@ -159,9 +159,9 @@ export default function SignupPage() {
             className="absolute inset-0"
             style={{
               background: `
-              radial-gradient(circle at 20% 80%, rgba(32, 128, 141, 0.1) 0%, transparent 50%),
-              radial-gradient(circle at 80% 20%, rgba(46, 86, 94, 0.1) 0%, transparent 50%),
-              radial-gradient(circle at 40% 40%, rgba(32, 128, 141, 0.05) 0%, transparent 50%)
+              radial-gradient(circle at 20% 80%, rgba(2, 189, 155, 0.1) 0%, transparent 50%),
+              radial-gradient(circle at 80% 20%, rgba(2, 189, 155, 0.08) 0%, transparent 50%),
+              radial-gradient(circle at 40% 40%, rgba(2, 189, 155, 0.05) 0%, transparent 50%)
             `,
             }}
           />
@@ -173,15 +173,15 @@ export default function SignupPage() {
           transition={{ duration: 20, repeat: Infinity, repeatType: "reverse" }}
           style={{
             backgroundImage: `
-              linear-gradient(rgba(32, 128, 141, 0.3) 1px, transparent 1px), 
-              linear-gradient(90deg, rgba(32, 128, 141, 0.3) 1px, transparent 1px)
+              linear-gradient(rgba(2, 189, 155, 0.3) 1px, transparent 1px), 
+              linear-gradient(90deg, rgba(2, 189, 155, 0.3) 1px, transparent 1px)
             `,
             backgroundSize: "40px 40px",
           }}
         />
 
         <motion.div
-          className="absolute top-1/4 left-1/4 w-64 h-64 bg-gradient-to-br from-[#20808D]/10 to-transparent rounded-full blur-3xl"
+          className="absolute top-1/4 left-1/4 w-64 h-64 bg-gradient-to-br from-[#02BD9B]/10 to-transparent rounded-full blur-3xl"
           animate={{
             rotate: 360,
             scale: [1, 1.2, 1],
@@ -192,7 +192,7 @@ export default function SignupPage() {
           }}
         />
         <motion.div
-          className="absolute bottom-1/4 right-1/4 w-48 h-48 bg-gradient-to-br from-[#2E565E]/10 to-transparent rounded-full blur-3xl"
+          className="absolute bottom-1/4 right-1/4 w-48 h-48 bg-gradient-to-br from-[#02BD9B]/8 to-transparent rounded-full blur-3xl"
           animate={{
             rotate: -360,
             scale: [1, 0.8, 1],
@@ -218,12 +218,12 @@ export default function SignupPage() {
             className="inline-flex items-center mb-6 space-x-3 group"
           >
             <div className="relative">
-              <div className="absolute inset-0 bg-gradient-to-br from-[#20808D] to-[#2E565E] rounded-2xl blur-lg opacity-50 group-hover:opacity-100 transition-opacity duration-300"></div>
-              <div className="relative w-12 h-12 bg-gradient-to-br from-[#20808D] to-[#2E565E] rounded-2xl flex items-center justify-center shadow-2xl border border-white/10">
+              <div className="absolute inset-0 bg-gradient-to-br from-[#02BD9B] to-[#02BD9B]/70 rounded-2xl blur-lg opacity-50 group-hover:opacity-100 transition-opacity duration-300"></div>
+              <div className="relative w-12 h-12 bg-gradient-to-br from-[#02BD9B] to-[#02BD9B]/80 rounded-2xl flex items-center justify-center shadow-2xl border border-[#02BD9B]/20">
                 <MessageSquare className="w-6 h-6 text-white" />
               </div>
             </div>
-            <span className="text-2xl font-bold bg-gradient-to-r from-white via-[#20808D] to-white bg-clip-text text-transparent">
+            <span className="text-2xl font-bold bg-gradient-to-r from-white via-[#02BD9B] to-white bg-clip-text text-transparent">
               Discourse
             </span>
           </Link>
@@ -233,7 +233,7 @@ export default function SignupPage() {
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.8, delay: 0.2 }}
           >
-            <Badge className="border-2 border-[#20808D]/40 text-[#20808D] bg-gradient-to-r from-[#20808D]/10 to-[#2E565E]/10 mb-4 px-4 py-1 backdrop-blur-xl">
+            <Badge className="border-2 border-[#02BD9B]/40 text-[#02BD9B] bg-gradient-to-r from-[#02BD9B]/10 to-[#02BD9B]/5 mb-4 px-4 py-1 backdrop-blur-xl">
               Join the Community
             </Badge>
           </motion.div>
@@ -251,8 +251,8 @@ export default function SignupPage() {
           <Card
             className="border-0 backdrop-blur-xl"
             style={{
-              background: `linear-gradient(135deg, rgba(19, 52, 59, 0.8), rgba(46, 86, 94, 0.6))`,
-              boxShadow: `0 25px 50px rgba(32, 128, 141, 0.2), 0 0 0 1px rgba(32, 128, 141, 0.1)`,
+              background: `linear-gradient(135deg, rgba(4, 4, 4, 0.9), rgba(2, 189, 155, 0.05))`,
+              boxShadow: `0 25px 50px rgba(2, 189, 155, 0.2), 0 0 0 1px rgba(2, 189, 155, 0.1)`,
             }}
           >
             <CardContent className="p-8">
@@ -266,13 +266,13 @@ export default function SignupPage() {
                     Full Name
                   </label>
                   <div className="relative">
-                    <User className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-[#20808D]" />
+                    <User className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-[#02BD9B]" />
                     <Input
                       id="fullName"
                       type="text"
                       value={fullName}
                       onChange={(e) => setFullName(e.target.value)}
-                      className="pl-10 bg-[#091717]/50 border border-[#20808D]/30 text-white placeholder:text-white/50 focus:border-[#20808D] transition-colors"
+                      className="pl-10 bg-[#040404]/50 border border-[#02BD9B]/30 text-white placeholder:text-white/50 focus:border-[#02BD9B] transition-colors"
                       placeholder="Enter your full name"
                       required
                     />
@@ -288,13 +288,13 @@ export default function SignupPage() {
                     Email Address
                   </label>
                   <div className="relative">
-                    <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-[#20808D]" />
+                    <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-[#02BD9B]" />
                     <Input
                       id="email"
                       type="email"
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
-                      className="pl-10 bg-[#091717]/50 border border-[#20808D]/30 text-white placeholder:text-white/50 focus:border-[#20808D] transition-colors"
+                      className="pl-10 bg-[#040404]/50 border border-[#02BD9B]/30 text-white placeholder:text-white/50 focus:border-[#02BD9B] transition-colors"
                       placeholder="Enter your email"
                       required
                     />
@@ -310,20 +310,20 @@ export default function SignupPage() {
                     Password
                   </label>
                   <div className="relative">
-                    <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-[#20808D]" />
+                    <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-[#02BD9B]" />
                     <Input
                       id="password"
                       type={showPassword ? "text" : "password"}
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
-                      className="pl-10 pr-10 bg-[#091717]/50 border border-[#20808D]/30 text-white placeholder:text-white/50 focus:border-[#20808D] transition-colors"
+                      className="pl-10 pr-10 bg-[#040404]/50 border border-[#02BD9B]/30 text-white placeholder:text-white/50 focus:border-[#02BD9B] transition-colors"
                       placeholder="Create a strong password"
                       required
                     />
                     <button
                       type="button"
                       onClick={() => setShowPassword(!showPassword)}
-                      className="absolute right-3 top-1/2 transform -translate-y-1/2 text-[#20808D] hover:text-[#20808D]/80 transition-colors"
+                      className="absolute right-3 top-1/2 transform -translate-y-1/2 text-[#02BD9B] hover:text-[#02BD9B]/80 transition-colors"
                     >
                       {showPassword ? (
                         <EyeOff className="w-5 h-5" />
@@ -348,7 +348,7 @@ export default function SignupPage() {
                           {getStrengthText(passwordStrength(password))}
                         </span>
                       </div>
-                      <div className="w-full bg-[#091717]/50 rounded-full h-1.5">
+                      <div className="w-full bg-[#040404]/50 rounded-full h-1.5">
                         <div
                           className="h-1.5 rounded-full transition-all duration-300"
                           style={{
@@ -372,13 +372,13 @@ export default function SignupPage() {
                     Confirm Password
                   </label>
                   <div className="relative">
-                    <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-[#20808D]" />
+                    <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-[#02BD9B]" />
                     <Input
                       id="confirmPassword"
                       type={showConfirmPassword ? "text" : "password"}
                       value={confirmPassword}
                       onChange={(e) => setConfirmPassword(e.target.value)}
-                      className="pl-10 pr-10 bg-[#091717]/50 border border-[#20808D]/30 text-white placeholder:text-white/50 focus:border-[#20808D] transition-colors"
+                      className="pl-10 pr-10 bg-[#040404]/50 border border-[#02BD9B]/30 text-white placeholder:text-white/50 focus:border-[#02BD9B] transition-colors"
                       placeholder="Confirm your password"
                       required
                     />
@@ -387,7 +387,7 @@ export default function SignupPage() {
                       onClick={() =>
                         setShowConfirmPassword(!showConfirmPassword)
                       }
-                      className="absolute right-3 top-1/2 transform -translate-y-1/2 text-[#20808D] hover:text-[#20808D]/80 transition-colors"
+                      className="absolute right-3 top-1/2 transform -translate-y-1/2 text-[#02BD9B] hover:text-[#02BD9B]/80 transition-colors"
                     >
                       {showConfirmPassword ? (
                         <EyeOff className="w-5 h-5" />
@@ -422,7 +422,7 @@ export default function SignupPage() {
                     id="terms"
                     checked={agreedToTerms}
                     onChange={(e) => setAgreedToTerms(e.target.checked)}
-                    className="mt-1 w-4 h-4 bg-[#091717]/50 border border-[#20808D]/30 rounded focus:ring-[#20808D] focus:ring-2"
+                    className="mt-1 w-4 h-4 bg-[#040404]/50 border border-[#02BD9B]/30 rounded focus:ring-[#02BD9B] focus:ring-2"
                   />
                   <label
                     htmlFor="terms"
@@ -440,7 +440,7 @@ export default function SignupPage() {
                   <Button
                     type="submit"
                     disabled={isLoading || !agreedToTerms}
-                    className="w-full bg-gradient-to-r from-[#20808D] to-[#2E565E] hover:from-[#20808D]/90 hover:to-[#2E565E]/90 text-white py-3 shadow-xl shadow-[#20808D]/30 border border-white/10 backdrop-blur-sm transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="w-full bg-gradient-to-r from-[#02BD9B] to-[#02BD9B]/80 hover:from-[#02BD9B]/90 hover:to-[#02BD9B]/70 text-[#040404] font-semibold py-3 shadow-xl shadow-[#02BD9B]/30 border border-[#02BD9B]/20 backdrop-blur-sm transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     {isLoading ? (
                       <>
@@ -479,7 +479,7 @@ export default function SignupPage() {
                     type="button"
                     variant="outline"
                     onClick={handleGoogleSignIn}
-                    className="w-full border-[#20808D]/30 text-white hover:bg-[#20808D]/10 backdrop-blur-sm transition-all duration-300"
+                    className="w-full border-[#02BD9B]/30 text-white hover:bg-[#02BD9B]/10 backdrop-blur-sm transition-all duration-300"
                   >
                     <Chrome className="w-5 h-5 mr-2" />
                     Continue with Google
@@ -501,7 +501,7 @@ export default function SignupPage() {
             Already have an account?{" "}
             <Link
               href="/login"
-              className="text-[#20808D] hover:text-[#20808D]/80 font-medium transition-colors"
+              className="text-[#02BD9B] hover:text-[#02BD9B]/80 font-medium transition-colors"
             >
               Sign in
             </Link>

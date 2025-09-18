@@ -90,17 +90,17 @@ export default function LobbyChat({ messages, room, user, onMessageSent }: Lobby
   }
 
   return (
-    <Card className="h-[600px] border-0 bg-gradient-to-br from-[#13343B]/80 to-[#2E565E]/40 backdrop-blur-xl flex flex-col">
+    <Card className="h-[600px] border-0 bg-gradient-to-br from-[#040404]/80 to-[#02BD9B]/40 backdrop-blur-xl flex flex-col">
       <CardHeader className="pb-4">
         <CardTitle className="flex items-center space-x-3 text-white">
-          <MessageSquare className="w-5 h-5 text-[#20808D]" />
+          <MessageSquare className="w-5 h-5 text-[#02BD9B]" />
           <span>Lobby Chat</span>
         </CardTitle>
       </CardHeader>
       
       <CardContent className="flex flex-col flex-1 space-y-4 overflow-hidden">
         {/* Messages Area */}
-        <div className="flex-1 overflow-y-auto space-y-3 pr-2 scrollbar-thin scrollbar-track-transparent scrollbar-thumb-[#20808D]/30 hover:scrollbar-thumb-[#20808D]/50">
+        <div className="flex-1 overflow-y-auto space-y-3 pr-2 scrollbar-thin scrollbar-track-transparent scrollbar-thumb-[#02BD9B]/30 hover:scrollbar-thumb-[#02BD9B]/50">
           <AnimatePresence>
             {messages.map((message) => {
               const isCurrentUser = message.user_id === user.id
@@ -114,7 +114,7 @@ export default function LobbyChat({ messages, room, user, onMessageSent }: Lobby
                     exit={{ opacity: 0, y: -20 }}
                     className="py-2 text-center"
                   >
-                    <Badge className="bg-[#20808D]/20 text-[#20808D] border-[#20808D]/30 text-xs">
+                    <Badge className="bg-[#02BD9B]/20 text-[#02BD9B] border-[#02BD9B]/30 text-xs">
                       {message.content}
                     </Badge>
                   </motion.div>
@@ -131,7 +131,7 @@ export default function LobbyChat({ messages, room, user, onMessageSent }: Lobby
                 >
                   <Avatar className="flex-shrink-0 w-8 h-8">
                     <AvatarImage src={message.profiles.avatar_url} />
-                    <AvatarFallback className="bg-[#20808D]/20 text-[#20808D] text-xs font-semibold">
+                    <AvatarFallback className="bg-[#02BD9B]/20 text-[#02BD9B] text-xs font-semibold">
                       {message.profiles.full_name.charAt(0).toUpperCase()}
                     </AvatarFallback>
                   </Avatar>
@@ -140,7 +140,7 @@ export default function LobbyChat({ messages, room, user, onMessageSent }: Lobby
                     <div className={`flex items-center space-x-2 ${isCurrentUser ? 'flex-row-reverse space-x-reverse' : ''}`}>
                       <span className="text-sm font-semibold text-white/90">
                         {message.profiles.full_name}
-                        {isCurrentUser && <span className="text-[#20808D] ml-1">(You)</span>}
+                        {isCurrentUser && <span className="text-[#02BD9B] ml-1">(You)</span>}
                       </span>
                       
                       <span className="text-xs text-white/50">
@@ -151,8 +151,8 @@ export default function LobbyChat({ messages, room, user, onMessageSent }: Lobby
                     <div className={`mt-1 ${isCurrentUser ? 'text-right' : ''}`}>
                       <div className={`inline-block p-3 rounded-lg max-w-xs break-words ${
                         isCurrentUser 
-                          ? 'bg-[#20808D]/30 border border-[#20808D]/40 text-white' 
-                          : 'bg-[#091717]/60 border border-[#20808D]/20 text-white/90'
+                          ? 'bg-[#02BD9B]/30 border border-[#02BD9B]/40 text-white' 
+                          : 'bg-[#040404]/60 border border-[#02BD9B]/20 text-white/90'
                       }`}>
                         <p className="text-sm leading-relaxed">{message.content}</p>
                       </div>
@@ -173,20 +173,20 @@ export default function LobbyChat({ messages, room, user, onMessageSent }: Lobby
         </div>
 
         {/* Message Input */}
-        <div className="border-t border-[#20808D]/20 pt-4">
+        <div className="border-t border-[#02BD9B]/20 pt-4">
           <form onSubmit={sendMessage} className="flex space-x-3">
             <Input
               value={newMessage}
               onChange={(e) => setNewMessage(e.target.value)}
               placeholder="Type your message..."
-              className="flex-1 bg-[#091717]/60 border-[#20808D]/30 text-white placeholder:text-white/50 focus:border-[#20808D]/60 focus:ring-[#20808D]/20"
+              className="flex-1 bg-[#040404]/60 border-[#02BD9B]/30 text-white placeholder:text-white/50 focus:border-[#02BD9B]/60 focus:ring-[#02BD9B]/20"
               disabled={loading}
               maxLength={500}
             />
             <Button
               type="submit"
               disabled={!newMessage.trim() || loading}
-              className="bg-[#20808D] hover:bg-[#20808D]/90 text-white px-6"
+              className="bg-[#02BD9B] hover:bg-[#02BD9B]/90 text-[#040404] font-semibold px-6"
             >
               {loading ? (
                 <motion.div

@@ -425,13 +425,13 @@ export default function DashboardPage() {
   const getModeColor = (mode: string) => {
     switch (mode) {
       case "classic":
-        return "#20808D";
+        return "#02BD9B";
       case "corporate":
-        return "#2E565E";
+        return "#02BD9B";
       case "interactive":
-        return "#20808D";
+        return "#02BD9B";
       default:
-        return "#20808D";
+        return "#02BD9B";
     }
   };
 
@@ -450,24 +450,24 @@ export default function DashboardPage() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-[#091717] flex items-center justify-center">
+      <div className="min-h-screen bg-[#040404] flex items-center justify-center">
         <motion.div
           animate={{ rotate: 360 }}
           transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-          className="w-12 h-12 border-4 border-[#20808D] border-t-transparent rounded-full"
+          className="w-12 h-12 border-4 border-[#02BD9B] border-t-transparent rounded-full"
         />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen w-full bg-[#091717] overflow-x-hidden relative">
+    <div className="min-h-screen w-full bg-[#040404] overflow-x-hidden relative">
       {/* Enhanced Background Effects */}
       <div className="fixed inset-0 z-0 pointer-events-none">
         {Array.from({ length: 60 }).map((_, i) => (
           <motion.div
             key={i}
-            className="absolute w-1 h-1 bg-[#20808D]/20 rounded-full"
+            className="absolute w-1 h-1 bg-[#02BD9B]/20 rounded-full"
             style={{
               left: `${Math.random() * 100}%`,
               top: `${Math.random() * 100}%`,
@@ -492,9 +492,9 @@ export default function DashboardPage() {
             className="absolute inset-0"
             style={{
               background: `
-              radial-gradient(circle at 25% 75%, rgba(32, 128, 141, 0.15) 0%, transparent 60%),
-              radial-gradient(circle at 75% 25%, rgba(46, 86, 94, 0.15) 0%, transparent 60%),
-              radial-gradient(circle at 50% 50%, rgba(32, 128, 141, 0.08) 0%, transparent 70%)
+              radial-gradient(circle at 25% 75%, rgba(2, 189, 155, 0.15) 0%, transparent 60%),
+              radial-gradient(circle at 75% 25%, rgba(2, 189, 155, 0.12) 0%, transparent 60%),
+              radial-gradient(circle at 50% 50%, rgba(2, 189, 155, 0.08) 0%, transparent 70%)
             `,
             }}
           />
@@ -506,8 +506,8 @@ export default function DashboardPage() {
           transition={{ duration: 30, repeat: Infinity, repeatType: "reverse" }}
           style={{
             backgroundImage: `
-              linear-gradient(rgba(32, 128, 141, 0.4) 1px, transparent 1px), 
-              linear-gradient(90deg, rgba(32, 128, 141, 0.4) 1px, transparent 1px)
+              linear-gradient(rgba(2, 189, 155, 0.4) 1px, transparent 1px), 
+              linear-gradient(90deg, rgba(2, 189, 155, 0.4) 1px, transparent 1px)
             `,
             backgroundSize: "50px 50px",
           }}
@@ -515,7 +515,7 @@ export default function DashboardPage() {
       </div>
 
       {/* Enhanced Header */}
-      <header className="relative z-10 border-b border-[#20808D]/30 bg-[#091717]/95 backdrop-blur-2xl shadow-xl shadow-[#20808D]/10">
+      <header className="relative z-10 border-b border-[#02BD9B]/30 bg-[#040404]/95 backdrop-blur-2xl shadow-xl shadow-[#02BD9B]/10">
         <div className="px-4 py-2 mx-auto max-w-7xl">
           <div className="flex items-center justify-between">
             <motion.div
@@ -525,12 +525,12 @@ export default function DashboardPage() {
             >
               <Link href="/" className="flex items-center space-x-4 group">
                 <div className="relative">
-                  <div className="absolute inset-0 bg-gradient-to-br from-[#20808D] to-[#2E565E] rounded-3xl blur-lg opacity-60 group-hover:opacity-100 transition-opacity duration-300"></div>
-                  <div className="relative w-12 h-12 bg-gradient-to-br from-[#20808D] to-[#2E565E] rounded-3xl flex items-center justify-center shadow-2xl border border-white/20">
+                  <div className="absolute inset-0 bg-gradient-to-br from-[#02BD9B] to-[#02BD9B] rounded-3xl blur-lg opacity-60 group-hover:opacity-100 transition-opacity duration-300"></div>
+                  <div className="relative w-12 h-12 bg-gradient-to-br from-[#02BD9B] to-[#02BD9B] rounded-3xl flex items-center justify-center shadow-2xl border border-white/20">
                     <MessageSquare className="text-white w-7 h-7" />
                   </div>
                 </div>
-                <span className="text-3xl font-bold bg-gradient-to-r from-white via-[#20808D] to-white bg-clip-text text-transparent">
+                <span className="text-3xl font-bold bg-gradient-to-r from-white via-[#02BD9B] to-white bg-clip-text text-transparent">
                   Discourse
                 </span>
               </Link>
@@ -552,7 +552,7 @@ export default function DashboardPage() {
               <div className="relative">
                 <Button
                   onClick={() => setShowProfile(!showProfile)}
-                  className="bg-gradient-to-r from-[#20808D]/20 to-[#2E565E]/20 hover:from-[#20808D]/30 hover:to-[#2E565E]/30 text-white border-2 border-[#20808D]/40 hover:border-[#20808D]/60 transition-all duration-300 px-4 py-2 h-12 shadow-xl backdrop-blur-sm rounded-xl"
+                  className="bg-gradient-to-r from-[#02BD9B]/20 to-[#02BD9B]/20 hover:from-[#02BD9B]/30 hover:to-[#02BD9B]/30 text-white border-2 border-[#02BD9B]/40 hover:border-[#02BD9B]/60 transition-all duration-300 px-4 py-2 h-12 shadow-xl backdrop-blur-sm rounded-xl"
                 >
                   <div className="flex items-center space-x-3">
                     {profile?.avatar_url ? (
@@ -561,10 +561,10 @@ export default function DashboardPage() {
                         alt="Avatar"
                         width={32}
                         height={32}
-                        className="w-8 h-8 rounded-full border-2 border-[#20808D]/50"
+                        className="w-8 h-8 rounded-full border-2 border-[#02BD9B]/50"
                       />
                     ) : (
-                      <div className="w-8 h-8 bg-[#20808D]/30 rounded-full flex items-center justify-center">
+                      <div className="w-8 h-8 bg-[#02BD9B]/30 rounded-full flex items-center justify-center">
                         <User className="w-4 h-4" />
                       </div>
                     )}
@@ -582,7 +582,7 @@ export default function DashboardPage() {
                   <motion.div
                     initial={{ opacity: 0, y: 10, scale: 0.95 }}
                     animate={{ opacity: 1, y: 0, scale: 1 }}
-                    className="absolute right-0 top-full mt-2 w-64 bg-slate-900 border border-[#20808D]/40 rounded-xl shadow-2xl z-[99999] overflow-hidden"
+                    className="absolute right-0 top-full mt-2 w-64 bg-slate-900 border border-[#02BD9B]/40 rounded-xl shadow-2xl z-[99999] overflow-hidden"
                     style={{ backgroundColor: "#0f172a" }}
                   >
                     <div className="p-4">
@@ -594,11 +594,11 @@ export default function DashboardPage() {
                             alt="Avatar"
                             width={40}
                             height={40}
-                            className="w-10 h-10 rounded-full border-2 border-[#20808D]/50"
+                            className="w-10 h-10 rounded-full border-2 border-[#02BD9B]/50"
                           />
                         ) : (
-                          <div className="w-10 h-10 bg-gradient-to-br from-[#20808D]/30 to-[#2E565E]/30 rounded-full flex items-center justify-center">
-                            <User className="w-5 h-5 text-[#20808D]" />
+                          <div className="w-10 h-10 bg-gradient-to-br from-[#02BD9B]/30 to-[#02BD9B]/30 rounded-full flex items-center justify-center">
+                            <User className="w-5 h-5 text-[#02BD9B]" />
                           </div>
                         )}
                         <div className="flex-1 min-w-0">
@@ -613,14 +613,14 @@ export default function DashboardPage() {
 
                       {/* Compact Stats */}
                       <div className="grid grid-cols-2 gap-2">
-                        <div className="text-center p-2 bg-[#20808D]/15 rounded-lg border border-[#20808D]/20">
-                          <div className="text-lg font-bold text-[#20808D]">
+                        <div className="text-center p-2 bg-[#02BD9B]/15 rounded-lg border border-[#02BD9B]/20">
+                          <div className="text-lg font-bold text-[#02BD9B]">
                             {profile?.total_debates || 0}
                           </div>
                           <div className="text-xs text-white/60">Debates</div>
                         </div>
-                        <div className="text-center p-2 bg-[#20808D]/15 rounded-lg border border-[#20808D]/20">
-                          <div className="text-lg font-bold text-[#20808D]">
+                        <div className="text-center p-2 bg-[#02BD9B]/15 rounded-lg border border-[#02BD9B]/20">
+                          <div className="text-lg font-bold text-[#02BD9B]">
                             {profile?.debates_won || 0}
                           </div>
                           <div className="text-xs text-white/60">Won</div>
@@ -646,7 +646,7 @@ export default function DashboardPage() {
         >
           <h1 className="mb-4 text-4xl font-bold leading-tight text-white md:text-4xl">
             Welcome back,
-            <span className="text-[#20808D] block sm:inline sm:ml-3">
+            <span className="text-[#02BD9B] block sm:inline sm:ml-3">
               {profile?.full_name?.split(" ")[0] || "Debater"}!
             </span>
           </h1>
@@ -667,7 +667,7 @@ export default function DashboardPage() {
             <Button
               onClick={() => setShowCreateRoom(true)}
               size="lg"
-              className="bg-gradient-to-r from-[#20808D] to-[#2E565E] hover:from-[#20808D]/90 hover:to-[#2E565E]/90 text-white px-6 py-4 text-sm font-semibold shadow-2xl shadow-[#20808D]/30 border border-white/20"
+              className="bg-gradient-to-r from-[#02BD9B] to-[#02BD9B]/80 hover:from-[#02BD9B]/90 hover:to-[#02BD9B]/70 text-[#040404] font-semibold px-6 py-4 text-sm shadow-2xl shadow-[#02BD9B]/30 border border-[#02BD9B]/20"
             >
               <Plus className="w-4 h-4 mr-1" />
               Create New Room
@@ -678,7 +678,7 @@ export default function DashboardPage() {
               onClick={() => setShowJoinRoom(true)}
               size="lg"
               variant="outline"
-              className="border-2 border-[#20808D]/50 text-white hover:bg-[#20808D]/20 backdrop-blur-sm px-10 py-4 text-sm font-semibold shadow-xl"
+              className="border-2 border-[#02BD9B]/50 text-white hover:bg-[#02BD9B]/20 backdrop-blur-sm px-10 py-4 text-sm font-semibold shadow-xl"
             >
               <Search className="w-4 h-4 mr-1" />
               Join Room
@@ -695,12 +695,12 @@ export default function DashboardPage() {
         >
           <div className="flex flex-col gap-6 lg:flex-row">
             <div className="relative flex-1">
-              <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 h-6 w-6 text-[#20808D]" />
+              <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 h-6 w-6 text-[#02BD9B]" />
               <Input
                 placeholder="Search rooms by title, topic, or host..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-12 pr-4 py-4 text-lg bg-[#13343B]/60 border-2 border-[#20808D]/30 text-white placeholder:text-white/60 focus:border-[#20808D] rounded-2xl backdrop-blur-sm shadow-xl"
+                className="pl-12 pr-4 py-4 text-lg bg-[#040404]/60 border-2 border-[#02BD9B]/30 text-white placeholder:text-white/60 focus:border-[#02BD9B] rounded-2xl backdrop-blur-sm shadow-xl"
               />
             </div>
           </div>
@@ -715,8 +715,8 @@ export default function DashboardPage() {
                   onClick={() => setSelectedMode(mode)}
                   className={
                     selectedMode === mode
-                      ? "bg-[#20808D] text-white hover:bg-[#20808D]/90 border-[#20808D] px-6 py-2 rounded-full font-semibold"
-                      : "border-[#20808D]/40 text-white hover:bg-[#20808D]/20 px-6 py-2 rounded-full"
+                      ? "bg-[#02BD9B] text-[#040404] hover:bg-[#02BD9B]/90 border-[#02BD9B] px-6 py-2 rounded-full font-semibold"
+                      : "border-[#02BD9B]/40 text-white hover:bg-[#02BD9B]/20 px-6 py-2 rounded-full"
                   }
                 >
                   {mode.charAt(0).toUpperCase() + mode.slice(1)}
@@ -733,8 +733,8 @@ export default function DashboardPage() {
                   onClick={() => setViewMode(view as "all" | "my")}
                   className={
                     viewMode === view
-                      ? "bg-[#2E565E] text-white hover:bg-[#2E565E]/90 border-[#2E565E] px-4 py-2 rounded-full"
-                      : "border-[#2E565E]/40 text-white hover:bg-[#2E565E]/20 px-4 py-2 rounded-full"
+                      ? "bg-[#02BD9B] text-[#040404] hover:bg-[#02BD9B]/90 border-[#02BD9B] px-4 py-2 rounded-full font-semibold"
+                      : "border-[#02BD9B]/40 text-white hover:bg-[#02BD9B]/20 px-4 py-2 rounded-full"
                   }
                 >
                   {view === "all" ? "All Rooms" : "My Rooms"}
@@ -772,7 +772,7 @@ export default function DashboardPage() {
                 whileHover={{ y: -8, scale: 1.02 }}
                 className="group"
               >
-                <Card className="border-0 bg-gradient-to-br from-[#13343B]/90 to-[#2E565E]/60 backdrop-blur-2xl h-full hover:shadow-2xl hover:shadow-[#20808D]/20 transition-all duration-500 overflow-hidden relative">
+                <Card className="border-0 bg-gradient-to-br from-[#040404]/90 to-[#02BD9B]/60 backdrop-blur-2xl h-full hover:shadow-2xl hover:shadow-[#02BD9B]/20 transition-all duration-500 overflow-hidden relative">
                   {/* Private Room Indicator - Top Left */}
                   {room.is_private && (
                     <div className="absolute z-10 top-3 left-4">
@@ -820,16 +820,16 @@ export default function DashboardPage() {
                         </motion.div>
 
                         <div>
-                          <CardTitle className="text-xl text-white group-hover:text-[#20808D] transition-colors duration-300">
+                          <CardTitle className="text-xl text-white group-hover:text-[#02BD9B] transition-colors duration-300">
                             {room.title}
                           </CardTitle>
                           <div className="flex items-center mt-1 space-x-2">
                             <span className="text-sm text-white/60">by</span>
-                            <span className="text-sm text-[#20808D] font-semibold">
+                            <span className="text-sm text-[#02BD9B] font-semibold">
                               {room.host_profile?.full_name || "Unknown Host"}
                             </span>
                             {isOwner && (
-                              <Badge className="bg-[#20808D]/20 text-[#20808D] border-0 text-xs">
+                              <Badge className="bg-[#02BD9B]/20 text-[#02BD9B] border-0 text-xs">
                                 Owner
                               </Badge>
                             )}
@@ -858,14 +858,14 @@ export default function DashboardPage() {
                     </p>
 
                     <div className="grid grid-cols-2 gap-4 mb-6">
-                      <div className="flex items-center space-x-2 text-white/70 bg-[#091717]/40 p-3 rounded-lg">
-                        <Users className="w-5 h-5 text-[#20808D]" />
+                      <div className="flex items-center space-x-2 text-white/70 bg-[#040404]/40 p-3 rounded-lg">
+                        <Users className="w-5 h-5 text-[#02BD9B]" />
                         <span className="font-semibold">
                           {room.current_participants}/{room.max_participants}
                         </span>
                       </div>
-                      <div className="flex items-center space-x-2 text-white/70 bg-[#091717]/40 p-3 rounded-lg">
-                        <Clock className="w-5 h-5 text-[#20808D]" />
+                      <div className="flex items-center space-x-2 text-white/70 bg-[#040404]/40 p-3 rounded-lg">
+                        <Clock className="w-5 h-5 text-[#02BD9B]" />
                         <span className="text-sm">
                           {new Date(room.created_at).toLocaleTimeString([], {
                             hour: "2-digit",
@@ -882,14 +882,14 @@ export default function DashboardPage() {
                           <span className="text-sm font-medium text-white/60">
                             Room Code:
                           </span>
-                          <code className="bg-[#20808D]/25 text-[#20808D] px-3 py-1 rounded-lg text-sm font-mono font-bold tracking-wider border border-[#20808D]/30">
+                          <code className="bg-[#02BD9B]/25 text-[#02BD9B] px-3 py-1 rounded-lg text-sm font-mono font-bold tracking-wider border border-[#02BD9B]/30">
                             {room.room_code}
                           </code>
                           <Button
                             size="sm"
                             variant="ghost"
                             onClick={() => copyRoomCode(room.room_code)}
-                            className="h-8 w-8 p-0 hover:bg-[#20808D]/20 text-[#20808D]"
+                            className="h-8 w-8 p-0 hover:bg-[#02BD9B]/20 text-[#02BD9B]"
                           >
                             <Copy className="w-4 h-4" />
                           </Button>
@@ -918,9 +918,9 @@ export default function DashboardPage() {
                       whileTap={{ scale: 0.98 }}
                     >
                       <Button
-                        className="w-full bg-gradient-to-r from-[#20808D]/30 to-[#2E565E]/30 hover:from-[#20808D] hover:to-[#2E565E] text-white border-2 border-[#20808D]/50 hover:border-[#20808D] transition-all duration-300 py-3 text-lg font-semibold shadow-lg"
+                        className="w-full bg-gradient-to-r from-[#02BD9B]/30 to-[#02BD9B]/30 hover:from-[#02BD9B] hover:to-[#02BD9B] text-white border-2 border-[#02BD9B]/50 hover:border-[#02BD9B] transition-all duration-300 py-3 text-lg font-semibold shadow-lg"
                         onClick={() => {
-                          if (isOwner) {
+                          if (isOwner || !room.is_private) {
                             router.push(`/room/${room.id}`);
                           } else {
                             setShowJoinRoom(true);
@@ -929,7 +929,7 @@ export default function DashboardPage() {
                         }}
                       >
                         <Eye className="w-5 h-5 mr-2" />
-                        {isOwner ? "Enter Room" : "Join with Code"}
+                        {isOwner ? "Enter Room" : room.is_private ? "Join with Code" : "Join Room"}
                       </Button>
                     </motion.div>
                   </CardContent>
@@ -957,7 +957,7 @@ export default function DashboardPage() {
             </p>
             <Button
               onClick={() => setShowCreateRoom(true)}
-              className="bg-gradient-to-r from-[#20808D] to-[#2E565E] text-white px-8 py-3"
+              className="bg-gradient-to-r from-[#02BD9B] to-[#02BD9B]/80 text-[#040404] font-semibold px-8 py-3"
             >
               <Plus className="w-5 h-5 mr-2" />
               Create Room
@@ -980,7 +980,7 @@ export default function DashboardPage() {
             onClick={(e) => e.stopPropagation()}
             className="w-full max-w-lg"
           >
-            <Card className="border-0 bg-gradient-to-br from-[#13343B] to-[#2E565E] backdrop-blur-2xl shadow-2xl">
+            <Card className="border-0 bg-gradient-to-br from-[#040404] to-[#011612] backdrop-blur-2xl shadow-2xl">
               <CardHeader className="pb-6">
                 <CardTitle className="text-2xl font-bold text-white">
                   Create New Room
@@ -999,7 +999,7 @@ export default function DashboardPage() {
                       value={roomTitle}
                       onChange={(e) => setRoomTitle(e.target.value)}
                       placeholder="Enter an engaging room title"
-                      className="bg-[#091717]/60 border-2 border-[#20808D]/30 text-white placeholder:text-white/60 focus:border-[#20808D] py-3 text-lg rounded-xl"
+                      className="bg-[#040404]/60 border-2 border-[#02BD9B]/30 text-white placeholder:text-white/60 focus:border-[#02BD9B] py-3 text-lg rounded-xl"
                       required
                     />
                   </div>
@@ -1012,7 +1012,7 @@ export default function DashboardPage() {
                       value={roomTopic}
                       onChange={(e) => setRoomTopic(e.target.value)}
                       placeholder="What will you debate about?"
-                      className="bg-[#091717]/60 border-2 border-[#20808D]/30 text-white placeholder:text-white/60 focus:border-[#20808D] py-3 text-lg rounded-xl"
+                      className="bg-[#040404]/60 border-2 border-[#02BD9B]/30 text-white placeholder:text-white/60 focus:border-[#02BD9B] py-3 text-lg rounded-xl"
                       required
                     />
                   </div>
@@ -1032,7 +1032,7 @@ export default function DashboardPage() {
                               | "interactive"
                           )
                         }
-                        className="w-full bg-[#091717]/60 border-2 border-[#20808D]/30 rounded-xl text-white py-3 px-3 text-lg focus:border-[#20808D] focus:outline-none appearance-none"
+                        className="w-full bg-[#040404]/60 border-2 border-[#02BD9B]/30 rounded-xl text-white py-3 px-3 text-lg focus:border-[#02BD9B] focus:outline-none appearance-none"
                       >
                         <option value="classic">Classic Debate</option>
                         <option value="corporate">Corporate Training</option>
@@ -1052,18 +1052,18 @@ export default function DashboardPage() {
                         }
                         min="2"
                         max="50"
-                        className="bg-[#091717]/60 border-2 border-[#20808D]/30 text-white focus:border-[#20808D] py-3 text-lg rounded-xl"
+                        className="bg-[#040404]/60 border-2 border-[#02BD9B]/30 text-white focus:border-[#02BD9B] py-3 text-lg rounded-xl"
                       />
                     </div>
                   </div>
 
-                  <div className="flex items-center space-x-3 p-4 bg-[#091717]/40 rounded-xl border border-[#20808D]/20">
+                  <div className="flex items-center space-x-3 p-4 bg-[#040404]/40 rounded-xl border border-[#02BD9B]/20">
                     <input
                       type="checkbox"
                       id="private"
                       checked={isPrivate}
                       onChange={(e) => setIsPrivate(e.target.checked)}
-                      className="w-5 h-5 text-[#20808D] bg-[#091717]/60 border-[#20808D]/30 rounded focus:ring-[#20808D] focus:ring-2"
+                      className="w-5 h-5 text-[#02BD9B] bg-[#040404]/60 border-[#02BD9B]/30 rounded focus:ring-[#02BD9B] focus:ring-2"
                     />
                     <label
                       htmlFor="private"
@@ -1078,7 +1078,7 @@ export default function DashboardPage() {
                     <Button
                       type="submit"
                       disabled={isCreatingRoom}
-                      className="flex-1 bg-gradient-to-r from-[#20808D] to-[#2E565E] hover:from-[#20808D]/90 hover:to-[#2E565E]/90 text-white py-4 text-lg font-semibold shadow-xl disabled:opacity-50 disabled:cursor-not-allowed"
+                      className="flex-1 bg-gradient-to-r from-[#02BD9B] to-[#02BD9B]/80 hover:from-[#02BD9B]/90 hover:to-[#02BD9B]/70 text-[#040404] py-4 text-lg font-semibold shadow-xl disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                       {isCreatingRoom ? "Creating..." : "Create Room"}
                     </Button>
@@ -1086,7 +1086,7 @@ export default function DashboardPage() {
                       type="button"
                       variant="outline"
                       onClick={() => setShowCreateRoom(false)}
-                      className="px-8 border-2 border-[#20808D]/50 text-white hover:bg-[#20808D]/20 py-4"
+                      className="px-8 border-2 border-[#02BD9B]/50 text-white hover:bg-[#02BD9B]/20 py-4"
                     >
                       Cancel
                     </Button>
@@ -1112,7 +1112,7 @@ export default function DashboardPage() {
             onClick={(e) => e.stopPropagation()}
             className="w-full max-w-md"
           >
-            <Card className="border-0 bg-gradient-to-br from-[#13343B] to-[#2E565E] backdrop-blur-2xl shadow-2xl">
+            <Card className="border-0 bg-gradient-to-br from-[#040404] to-[#011612] backdrop-blur-2xl shadow-2xl">
               <CardHeader className="pb-6">
                 <CardTitle className="text-2xl font-bold text-white">
                   Join Room
@@ -1133,7 +1133,7 @@ export default function DashboardPage() {
                         setJoinCode(e.target.value.toUpperCase())
                       }
                       placeholder="XXXXXX"
-                      className="bg-[#091717]/60 border-2 border-[#20808D]/30 text-white font-mono text-center text-2xl tracking-[0.5em] placeholder:text-white/60 focus:border-[#20808D] py-4 rounded-xl"
+                      className="bg-[#040404]/60 border-2 border-[#02BD9B]/30 text-white font-mono text-center text-2xl tracking-[0.5em] placeholder:text-white/60 focus:border-[#02BD9B] py-4 rounded-xl"
                       maxLength={6}
                       required
                     />
@@ -1141,7 +1141,7 @@ export default function DashboardPage() {
                   <div className="flex gap-4 pt-4">
                     <Button
                       type="submit"
-                      className="flex-1 bg-gradient-to-r from-[#20808D] to-[#2E565E] hover:from-[#20808D]/90 hover:to-[#2E565E]/90 text-white py-4 text-lg font-semibold shadow-xl"
+                      className="flex-1 bg-gradient-to-r from-[#02BD9B] to-[#02BD9B]/80 hover:from-[#02BD9B]/90 hover:to-[#02BD9B]/70 text-[#040404] py-4 text-lg font-semibold shadow-xl"
                     >
                       Join Room
                     </Button>
@@ -1149,7 +1149,7 @@ export default function DashboardPage() {
                       type="button"
                       variant="outline"
                       onClick={() => setShowJoinRoom(false)}
-                      className="px-8 border-2 border-[#20808D]/50 text-white hover:bg-[#20808D]/20 py-4"
+                      className="px-8 border-2 border-[#02BD9B]/50 text-white hover:bg-[#02BD9B]/20 py-4"
                     >
                       Cancel
                     </Button>

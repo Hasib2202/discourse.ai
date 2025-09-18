@@ -24,26 +24,20 @@ module.exports = {
                 background: "hsl(var(--background))",
                 foreground: "hsl(var(--foreground))",
                 primary: {
-                    DEFAULT: "#20808D",
-                    foreground: "#091717",
+                    DEFAULT: "#02BD9B",
+                    foreground: "#040404",
                 },
                 secondary: {
-                    DEFAULT: "#13343B",
-                    foreground: "#20808D",
-                },
-                tertiary: {
-                    DEFAULT: "#2E565E",
-                    foreground: "#20808D",
+                    DEFAULT: "#040404",
+                    foreground: "#02BD9B",
                 },
                 accent: {
-                    DEFAULT: "#20808D",
-                    foreground: "#091717",
+                    DEFAULT: "#02BD9B",
+                    foreground: "#040404",
                 },
                 discourse: {
-                    dark: "#091717",
-                    teal: "#20808D",
-                    darkTeal: "#13343B",
-                    mediumTeal: "#2E565E",
+                    dark: "#040404",
+                    green: "#02BD9B",
                 },
                 destructive: {
                     DEFAULT: "hsl(var(--destructive))",

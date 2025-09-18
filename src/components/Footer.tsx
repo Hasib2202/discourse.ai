@@ -6,8 +6,8 @@ import { motion } from "framer-motion";
 
 export default function Footer() {
   return (
-    <footer className="w-full relative overflow-hidden border-t border-[#20808D]/20">
-      <div className="absolute inset-0 bg-gradient-to-t from-[#13343B] via-[#091717] to-[#091717]"></div>
+    <footer className="w-full relative overflow-hidden border-t border-[#02BD9B]/20">
+      <div className="absolute inset-0 bg-gradient-to-t from-[#02BD9B]/8 via-[#040404] to-[#040404]"></div>
 
       <div className="relative z-10 px-6 py-20 mx-auto max-w-7xl">
         <div className="grid gap-12 mb-16 lg:grid-cols-5">
@@ -20,13 +20,13 @@ export default function Footer() {
               className="flex items-center space-x-4"
             >
               <div className="relative group">
-                <div className="absolute inset-0 bg-gradient-to-br from-[#20808D] to-[#2E565E] rounded-2xl blur-xl opacity-50"></div>
-                <div className="relative w-16 h-16 bg-gradient-to-br from-[#20808D] to-[#2E565E] rounded-2xl flex items-center justify-center shadow-2xl border border-white/10">
+                <div className="absolute inset-0 bg-gradient-to-br from-[#02BD9B] to-[#02BD9B]/70 rounded-2xl blur-xl opacity-50"></div>
+                <div className="relative w-16 h-16 bg-gradient-to-br from-[#02BD9B] to-[#02BD9B]/80 rounded-2xl flex items-center justify-center shadow-2xl border border-[#02BD9B]/20">
                   <MessageSquare className="w-8 h-8 text-white" />
                 </div>
               </div>
               <div>
-                <span className="text-3xl font-bold bg-gradient-to-r from-white to-[#20808D] bg-clip-text text-transparent">
+                <span className="text-3xl font-bold bg-gradient-to-r from-white to-[#02BD9B] bg-clip-text text-transparent">
                   Discourse
                 </span>
                 <p className="text-sm text-white/60">
@@ -50,9 +50,9 @@ export default function Footer() {
                   href="#"
                   whileHover={{ scale: 1.1, y: -2 }}
                   whileTap={{ scale: 0.9 }}
-                  className="w-12 h-12 bg-[#20808D]/20 rounded-xl flex items-center justify-center hover:bg-[#20808D]/40 transition-all duration-300 border border-[#20808D]/30 backdrop-blur-sm"
+                  className="w-12 h-12 bg-[#02BD9B]/20 rounded-xl flex items-center justify-center hover:bg-[#02BD9B]/40 transition-all duration-300 border border-[#02BD9B]/30 backdrop-blur-sm"
                 >
-                  <social.icon className="h-5 w-5 text-[#20808D]" />
+                  <social.icon className="h-5 w-5 text-[#02BD9B]" />
                 </motion.a>
               ))}
             </div>
@@ -99,7 +99,7 @@ export default function Footer() {
                   <li key={link}>
                     <Link
                       href="#"
-                      className="text-white/70 hover:text-[#20808D] transition-all duration-300 hover:translate-x-2 inline-block"
+                      className="text-white/70 hover:text-[#02BD9B] transition-all duration-300 hover:translate-x-2 inline-block"
                     >
                       {link}
                     </Link>
@@ -115,17 +115,17 @@ export default function Footer() {
           whileInView={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 0.8 }}
           viewport={{ once: true }}
-          className="border-t border-[#20808D]/20 pt-12 flex flex-col lg:flex-row justify-between items-center"
+          className="border-t border-[#02BD9B]/20 pt-12 flex flex-col lg:flex-row justify-between items-center"
         >
           <p className="text-lg text-center text-white/60 lg:text-left">
-            © 2024 Discourse. All rights reserved. Built with intelligence.
+            © 2025 Discourse. All rights reserved. Built with intelligence.
           </p>
           <div className="flex items-center mt-6 space-x-8 lg:mt-0">
             {["Privacy", "Terms", "Cookies", "Sitemap"].map((link) => (
               <Link
                 key={link}
                 href="#"
-                className="text-white/60 hover:text-[#20808D] transition-colors duration-300 hover:underline"
+                className="text-white/60 hover:text-[#02BD9B] transition-colors duration-300 hover:underline"
               >
                 {link}
               </Link>

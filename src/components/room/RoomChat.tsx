@@ -106,9 +106,9 @@ export default function RoomChat({
       return "bg-yellow-500/10 border-yellow-500/20 text-yellow-400";
     }
     if (isOwnMessage) {
-      return "bg-[#20808D]/20 border-[#20808D]/40 text-white ml-12";
+      return "bg-[#02BD9B]/20 border-[#02BD9B]/40 text-white ml-12";
     }
-    return "bg-[#091717]/40 border-[#20808D]/20 text-white mr-12";
+    return "bg-[#040404]/40 border-[#02BD9B]/20 text-white mr-12";
   };
 
   const formatTime = (timestamp: string) => {
@@ -119,12 +119,12 @@ export default function RoomChat({
   };
 
   return (
-    <Card className="border-0 bg-gradient-to-br from-[#13343B]/80 to-[#2E565E]/40 backdrop-blur-xl h-[600px] flex flex-col">
+    <Card className="border-0 bg-gradient-to-br from-[#040404]/80 to-[#02BD9B]/40 backdrop-blur-xl h-[600px] flex flex-col">
       <CardHeader className="pb-3">
         <CardTitle className="flex items-center space-x-3 text-white">
-          <MessageSquare className="w-5 h-5 text-[#20808D]" />
+          <MessageSquare className="w-5 h-5 text-[#02BD9B]" />
           <span>Lobby Chat</span>
-          <Badge className="bg-[#20808D]/20 text-[#20808D] border-[#20808D]/40 text-xs">
+          <Badge className="bg-[#02BD9B]/20 text-[#02BD9B] border-[#02BD9B]/40 text-xs">
             {messages.length}
           </Badge>
         </CardTitle>
@@ -165,7 +165,7 @@ export default function RoomChat({
                         <div className="flex items-center space-x-2">
                           <Avatar className="w-6 h-6">
                             <AvatarImage src={message.profiles.avatar_url} />
-                            <AvatarFallback className="bg-[#20808D]/20 text-[#20808D] text-xs">
+                            <AvatarFallback className="bg-[#02BD9B]/20 text-[#02BD9B] text-xs">
                               {message.profiles.full_name
                                 .charAt(0)
                                 .toUpperCase()}
@@ -174,7 +174,7 @@ export default function RoomChat({
                           <span className="text-sm font-semibold">
                             {message.profiles.full_name}
                             {isOwnMessage && (
-                              <span className="text-[#20808D] ml-1">(You)</span>
+                              <span className="text-[#02BD9B] ml-1">(You)</span>
                             )}
                           </span>
                         </div>
@@ -206,20 +206,20 @@ export default function RoomChat({
         </div>
 
         {/* Message Input */}
-        <div className="p-4 border-t border-[#20808D]/20">
+        <div className="p-4 border-t border-[#02BD9B]/20">
           <form onSubmit={handleSendMessage} className="flex space-x-3">
             <Input
               value={newMessage}
               onChange={(e) => setNewMessage(e.target.value)}
               placeholder="Type a message..."
-              className="flex-1 bg-[#091717]/60 border-[#20808D]/30 text-white placeholder:text-white/60 focus:border-[#20808D] rounded-xl"
+              className="flex-1 bg-[#040404]/60 border-[#02BD9B]/30 text-white placeholder:text-white/60 focus:border-[#02BD9B] rounded-xl"
               disabled={sending}
               maxLength={500}
             />
             <Button
               type="submit"
               disabled={!newMessage.trim() || sending}
-              className="bg-[#20808D] hover:bg-[#20808D]/90 text-white px-4 rounded-xl transition-all duration-300 disabled:opacity-50"
+              className="bg-[#02BD9B] hover:bg-[#02BD9B]/90 text-[#040404] font-semibold px-4 rounded-xl transition-all duration-300 disabled:opacity-50"
             >
               <Send className="w-4 h-4" />
             </Button>

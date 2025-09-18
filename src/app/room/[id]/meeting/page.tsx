@@ -246,11 +246,11 @@ export default function MeetingRoomPage({ params }: Props) {
   // Show loading spinner while authentication or room data is loading
   if (authLoading || loading) {
     return (
-      <div className="min-h-screen bg-[#091717] flex items-center justify-center">
+      <div className="min-h-screen bg-[#040404] flex items-center justify-center">
         <motion.div
           animate={{ rotate: 360 }}
           transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-          className="w-12 h-12 border-4 border-[#20808D] border-t-transparent rounded-full"
+          className="w-12 h-12 border-4 border-[#02BD9B] border-t-transparent rounded-full"
         />
       </div>
     );
@@ -260,11 +260,11 @@ export default function MeetingRoomPage({ params }: Props) {
   if (!user) {
     router.push("/login");
     return (
-      <div className="min-h-screen bg-[#091717] flex items-center justify-center">
+      <div className="min-h-screen bg-[#040404] flex items-center justify-center">
         <motion.div
           animate={{ rotate: 360 }}
           transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-          className="w-12 h-12 border-4 border-[#20808D] border-t-transparent rounded-full"
+          className="w-12 h-12 border-4 border-[#02BD9B] border-t-transparent rounded-full"
         />
       </div>
     );
@@ -273,7 +273,7 @@ export default function MeetingRoomPage({ params }: Props) {
   // Show error if room not found
   if (!room) {
     return (
-      <div className="min-h-screen bg-[#091717] flex items-center justify-center">
+      <div className="min-h-screen bg-[#040404] flex items-center justify-center">
         <div className="text-center">
           <h1 className="mb-4 text-2xl font-bold text-white">
             Meeting Not Found
@@ -284,7 +284,7 @@ export default function MeetingRoomPage({ params }: Props) {
           </p>
           <button
             onClick={() => router.push("/dashboard")}
-            className="bg-[#20808D] hover:bg-[#20808D]/90 text-white px-6 py-3 rounded-lg transition-colors"
+            className="bg-[#02BD9B] hover:bg-[#02BD9B]/90 text-white px-6 py-3 rounded-lg transition-colors"
           >
             Back to Dashboard
           </button>
@@ -305,6 +305,8 @@ export default function MeetingRoomPage({ params }: Props) {
       participants={participants}
       userDisplayName={userDisplayName}
       onLeaveRoom={handleLeaveRoom}
+      isHost={room?.host_id === user.id}
+      hostId={room?.host_id}
     />
   );
 }

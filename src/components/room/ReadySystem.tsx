@@ -96,7 +96,7 @@ export default function ReadySystem({ currentParticipant, participants, room, is
   }
 
   return (
-    <Card className="border-0 bg-gradient-to-br from-[#13343B]/80 to-[#2E565E]/40 backdrop-blur-xl">
+    <Card className="border-0 bg-gradient-to-br from-[#040404]/80 to-[#02BD9B]/40 backdrop-blur-xl">
       <CardHeader className="pb-3">
         <CardTitle className="flex items-center space-x-2 text-lg text-white">
           <CheckCircle2 className={`w-5 h-5 ${isReady ? 'text-green-400' : 'text-white/40'}`} />
@@ -109,14 +109,14 @@ export default function ReadySystem({ currentParticipant, participants, room, is
         <div className="space-y-3">
           <div className="flex items-center justify-between">
             <span className="text-sm font-semibold text-white/80">Room Readiness</span>
-            <Badge className="bg-[#20808D]/20 text-[#20808D] border-[#20808D]/40 font-semibold text-xs">
+            <Badge className="bg-[#02BD9B]/20 text-[#02BD9B] border-[#02BD9B]/40 font-semibold text-xs">
               {readyCount}/{totalParticipants} Ready
             </Badge>
           </div>
           
           <Progress 
             value={readyPercentage} 
-            className="h-2 bg-[#091717]/60 border border-[#20808D]/20"
+            className="h-2 bg-[#040404]/60 border border-[#02BD9B]/20"
           />
           
           <div className="text-sm text-center text-white/60">
@@ -125,7 +125,7 @@ export default function ReadySystem({ currentParticipant, participants, room, is
         </div>
 
         {/* Current Status */}
-        <div className="flex items-center justify-between p-3 rounded-lg bg-[#091717]/40 border border-[#20808D]/20">
+        <div className="flex items-center justify-between p-3 rounded-lg bg-[#040404]/40 border border-[#02BD9B]/20">
           <div className="flex items-center space-x-3">
             {isReady ? (
               <CheckCircle2 className="w-5 h-5 text-green-400" />
