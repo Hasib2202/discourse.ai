@@ -6,7 +6,7 @@ import { Server } from 'socket.io';
 
 const dev = process.env.NODE_ENV !== 'production';
 const hostname = 'localhost';
-const port = process.env.PORT || 3001;
+const port = process.env.PORT || 3002;
 
 // Create Next.js app
 const app = next({ dev, hostname, port });
@@ -437,6 +437,16 @@ app.prepare().then(() => {
         // Handle debug logs from client
         socket.on('debug-log', (data) => {
             console.log('🐛 CLIENT DEBUG:', data.message, data);
+        });
+
+        // Handle host ending meeting for everyone
+        socket.on('host-end-meeting', (data) => {
+            const { roomId } = data;
+            console.log(`🏁 Host ending meeting in room ${roomId} for all participants`);
+
+            // Notify all other participants in the room that the meeting has ended
+            socket.to(roomId).emit('meeting-ended-by-host');
+            console.log(`📡 Sent meeting-ended-by-host to all participants in room ${roomId}`);
         });
 
         // Handle disconnect

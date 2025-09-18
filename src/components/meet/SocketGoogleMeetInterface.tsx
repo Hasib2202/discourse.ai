@@ -55,6 +55,7 @@ interface SocketGoogleMeetInterfaceProps {
   participants: Participant[];
   userDisplayName: string;
   onLeaveRoom: () => void;
+  isHost?: boolean;
 }
 
 // Extend window object for pending audio elements
@@ -70,6 +71,7 @@ export default function SocketGoogleMeetInterface({
   participants,
   userDisplayName,
   onLeaveRoom,
+  isHost = false,
 }: SocketGoogleMeetInterfaceProps) {
   const [isMuted, setIsMuted] = useState(false);
   const [isVideoOn, setIsVideoOn] = useState(false);
@@ -1621,12 +1623,19 @@ export default function SocketGoogleMeetInterface({
       });
     });
 
+    // Handle host ending the meeting
+    socket.on("meeting-ended-by-host", () => {
+      console.log("🏁 Meeting ended by host - leaving room");
+      onLeaveRoom();
+    });
+
     return () => {
       socket.off("video-call-user-joined");
       socket.off("webrtc-offer");
       socket.off("webrtc-answer");
       socket.off("webrtc-ice-candidate");
       socket.off("video-call-user-left");
+      socket.off("meeting-ended-by-host");
     };
   }, [
     socketRef,
@@ -1828,6 +1837,15 @@ export default function SocketGoogleMeetInterface({
 
   const canStartMeeting = realTimeParticipants.length >= 2;
 
+  // Function to handle leave button click
+  const handleLeaveClick = () => {
+    if (isHost) {
+      console.log("👑 Host is ending the meeting for everyone");
+      socketRef.current?.emit("host-end-meeting", { roomId });
+    }
+    onLeaveRoom();
+  };
+
   return (
     <div
       className="min-h-screen w-full bg-[#091717] overflow-x-hidden relative"
@@ -2001,7 +2019,7 @@ export default function SocketGoogleMeetInterface({
       )}
 
       {/* Main Content */}
-      <div className="relative z-10 flex flex-1 h-[calc(100vh-140px)]">
+      <div className="relative z-10 flex flex-1 h-[calc(100vh-210px)]">
         {/* Video Grid */}
         <div className="flex-1 p-6">
           {!canStartMeeting ? (
@@ -2552,7 +2570,7 @@ export default function SocketGoogleMeetInterface({
             )} */}
 
             {/* Single Video Call Toggle Button */}
-            <Button
+            {/* <Button
               onClick={isVideoCallActive ? stopVideoCall : startVideoCall}
               size="lg"
               className={`w-14 h-14 rounded-full border-2 transition-all duration-300 ${
@@ -2569,7 +2587,7 @@ export default function SocketGoogleMeetInterface({
               ) : (
                 <Video className="w-6 h-6" />
               )}
-            </Button>
+            </Button> */}
 
             {/* Hand Raise Button */}
             <Button
@@ -2673,16 +2691,16 @@ export default function SocketGoogleMeetInterface({
             </Button>
 
             {/* Screen Share Button */}
-            <Button
+            {/* <Button
               size="lg"
               className="text-white border-2 rounded-full w-14 h-14 bg-white/10 hover:bg-white/20 border-white/20"
             >
               <Monitor className="w-6 h-6" />
-            </Button>
+            </Button> */}
 
             {/* Leave Button */}
             <Button
-              onClick={onLeaveRoom}
+              onClick={handleLeaveClick}
               size="lg"
               className="ml-8 text-white bg-red-500 border-2 border-red-400 rounded-full w-14 h-14 hover:bg-red-600"
             >
