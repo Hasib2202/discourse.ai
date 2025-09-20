@@ -26,10 +26,14 @@ export const useSocket = ({ roomId, userId, userName }: UseSocketProps) => {
     const [participantStatus, setParticipantStatus] = useState<Map<string, ParticipantStatus>>(new Map());
 
     useEffect(() => {
+        console.log('🚀 CLAUDE DEBUG: useSocket effect triggered!', { roomId, userId, userName });
+
         // Get socket URL - use environment variable if set, otherwise fallback to localhost for dev
         const socketUrl = process.env.NEXT_PUBLIC_SOCKET_URL || 'http://localhost:3002';
 
         console.log('🔌 Connecting to Socket.IO server:', socketUrl);
+        console.log('🔧 DEBUG - Environment variable NEXT_PUBLIC_SOCKET_URL:', process.env.NEXT_PUBLIC_SOCKET_URL);
+        console.log('🔧 DEBUG - All env vars:', Object.keys(process.env).filter(k => k.startsWith('NEXT_PUBLIC')));
 
         // Initialize Socket.IO connection with environment-aware URL
         const socket = io(socketUrl, {

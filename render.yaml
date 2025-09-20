@@ -1,11 +1,10 @@
 services:
   - type: web
-    name: discourse-socket-server
+    name: discourse-app
     runtime: node
     repo: https://github.com/Hasib2202/discourse.ai
-    branch: dev
-    rootDir: socket-server
-    buildCommand: npm install
+    branch: devUI2
+    buildCommand: npm install && npm run build
     startCommand: npm start
     plan: free
     envVars:
