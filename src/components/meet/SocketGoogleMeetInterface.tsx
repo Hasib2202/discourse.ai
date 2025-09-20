@@ -813,10 +813,33 @@ export default function SocketGoogleMeetInterface({
     [roomId, socketRef]
   );
 
+  // Force reset audio state (debug function)
+  const forceResetAudioState = useCallback(() => {
+    console.log("🔄 FORCE RESET: Resetting audio state...");
+    setIsStreaming(false);
+    setIsMuted(false);
+
+    // Close all existing audio peer connections
+    audioPeerConnections.current.forEach((pc, userId) => {
+      pc.close();
+      console.log(`🔌 Closed audio peer connection for ${userId}`);
+    });
+    audioPeerConnections.current.clear();
+
+    // Stop media stream
+    if (mediaStreamRef.current) {
+      mediaStreamRef.current.getTracks().forEach(track => track.stop());
+      mediaStreamRef.current = null;
+    }
+
+    console.log("✅ Audio state reset complete");
+  }, []);
+
   // Start audio streaming
   const startAudioStreaming = useCallback(async () => {
     try {
       console.log("🎙️ Starting audio streaming process...");
+      console.log("🔧 Current state - isStreaming:", isStreaming, "participants:", socketParticipants.length);
 
       // Step 1: Test microphone permission first
       const hasPermission = await requestMicrophonePermission();
@@ -896,6 +919,27 @@ export default function SocketGoogleMeetInterface({
     roomId,
     socketRef,
   ]);
+
+  // Reset stuck audio state on component mount
+  useEffect(() => {
+    console.log("🚀 Component mounted - checking for stuck audio state");
+    console.log("🔧 Initial state:", { isStreaming, audioPeerConnectionsCount: audioPeerConnections.current.size });
+
+    // If we have isStreaming=true but no peer connections, we're in a stuck state
+    if (isStreaming && audioPeerConnections.current.size === 0) {
+      console.log("⚠️ Detected stuck audio state - resetting...");
+      setIsStreaming(false);
+      setIsMuted(false);
+
+      // Stop any lingering media stream
+      if (mediaStreamRef.current) {
+        mediaStreamRef.current.getTracks().forEach(track => track.stop());
+        mediaStreamRef.current = null;
+      }
+
+      console.log("✅ Stuck audio state reset");
+    }
+  }, []); // Run only on mount
 
   // Auto-start audio streaming when minimum people present
   useEffect(() => {

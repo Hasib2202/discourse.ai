@@ -5,7 +5,7 @@ import next from 'next';
 import { Server } from 'socket.io';
 
 const dev = process.env.NODE_ENV !== 'production';
-const hostname = 'localhost';
+const hostname = dev ? 'localhost' : '0.0.0.0'; // Allow external connections in production
 const port = process.env.PORT || 3002;
 
 // Create Next.js app
@@ -21,10 +21,25 @@ const webrtcRooms = new Map();
 const webrtcParticipants = new Map();
 
 app.prepare().then(() => {
-    // Create HTTP server
+    // Create HTTP server with health check
     const httpServer = createServer(async (req, res) => {
         try {
             const parsedUrl = parse(req.url, true);
+
+            // Health check endpoint for deployment
+            if (parsedUrl.pathname === '/health') {
+                res.writeHead(200, { 'Content-Type': 'application/json' });
+                res.end(JSON.stringify({
+                    status: 'ok',
+                    timestamp: new Date().toISOString(),
+                    environment: dev ? 'development' : 'production',
+                    connections: io ? io.engine.clientsCount : 0,
+                    rooms: roomParticipants.size
+                }));
+                return;
+            }
+
+            // Let Next.js handle all other routes
             await handle(req, res, parsedUrl);
         } catch (err) {
             console.error('Error occurred handling', req.url, err);
@@ -33,12 +48,22 @@ app.prepare().then(() => {
         }
     });
 
-    // Initialize Socket.IO
+    // Initialize Socket.IO with production-ready CORS
     const io = new Server(httpServer, {
         cors: {
-            origin: ["http://localhost:3000", "http://localhost:3001", "http://127.0.0.1:3000"],
-            methods: ["GET", "POST"]
-        }
+            origin: dev ?
+                ["http://localhost:3000", "http://localhost:3001", "http://localhost:3002", "http://127.0.0.1:3000"] :
+                [
+                    "https://discourse-ai-five.vercel.app",
+                    "https://discourse-ai-hasib2202s-projects.vercel.app",
+                    "https://discourse-ai-git-main-hasib2202s-projects.vercel.app",
+                    /^https:\/\/discourse-ai-.*\.vercel\.app$/,
+                    /\.onrender\.com$/
+                ],
+            methods: ["GET", "POST"],
+            credentials: true
+        },
+        transports: ['websocket', 'polling']
     });
 
     // Socket.IO connection handling
@@ -514,8 +539,10 @@ app.prepare().then(() => {
     });
 
     // Start the server
-    httpServer.listen(port, (err) => {
+    httpServer.listen(port, hostname, (err) => {
         if (err) throw err;
         console.log(`🚀 Next.js + Socket.IO server ready on http://${hostname}:${port}`);
+        console.log(`📊 Health check available at http://${hostname}:${port}/health`);
+        console.log(`🌍 Environment: ${dev ? 'development' : 'production'}`);
     });
 });
