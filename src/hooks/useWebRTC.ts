@@ -34,20 +34,30 @@ export const useWebRTC = ({ roomId, userId, userName }: UseWebRTCProps) => {
   const peersRef = useRef<Map<string, RTCPeerConnection>>(new Map());
   const localStreamRef = useRef<MediaStream | null>(null);
 
-  // WebRTC Configuration
+  // WebRTC Configuration with multiple STUN servers for better connectivity
   const pcConfig = {
     iceServers: [
       { urls: 'stun:stun.l.google.com:19302' },
       { urls: 'stun:stun1.l.google.com:19302' },
-      { urls: 'stun:stun2.l.google.com:19302' }
-    ]
+      { urls: 'stun:stun2.l.google.com:19302' },
+      { urls: 'stun:stun3.l.google.com:19302' },
+      { urls: 'stun:stun4.l.google.com:19302' },
+      // Additional STUN servers for better reliability
+      { urls: 'stun:stunserver.org:3478' },
+      { urls: 'stun:stun.stunprotocol.org:3478' }
+    ],
+    iceCandidatePoolSize: 10
   };
 
   // Initialize Socket.IO connection
   const initializeSocket = useCallback(() => {
     if (!socketRef.current) {
-      socketRef.current = io('http://localhost:3001', {
-        transports: ['websocket']
+      // Get socket URL - use environment variable if set, otherwise fallback to localhost for dev
+      const socketUrl = process.env.NEXT_PUBLIC_SOCKET_URL || 'http://localhost:3002';
+      console.log('🔌 WebRTC connecting to Socket.IO server:', socketUrl);
+
+      socketRef.current = io(socketUrl, {
+        transports: ['websocket', 'polling']
       });
 
       const socket = socketRef.current;
