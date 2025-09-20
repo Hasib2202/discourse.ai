@@ -133,9 +133,8 @@ app.prepare().then(() => {
                     isMuted,
                     isStreaming
                 });
-            } else {
-                console.log(`❌ No participant found for audio status update, socket: ${socket.id}`);
             }
+            // Note: Silently ignore audio status updates before join-room
         });
 
         // Handle speaking status
